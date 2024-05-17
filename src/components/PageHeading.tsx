@@ -20,41 +20,32 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./App.css";
+import theme from "../theme/theme";
 
-import { Routes, Route } from "react-router-dom";
-import ErrorPage from "./routes/ErrorPage";
-import Layout from "./theme/LayoutMain";
-import Home from "./routes/home";
-import Substates from "./routes/substates";
+interface Props {
+  children: string;
+}
 
-export const breadcrumbRoutes = [
-  {
-    label: "Home",
-    path: "/",
-    dynamic: false
-  },
-  {
-    label: "Substates",
-    path: "/substates",
-    dynamic: false,
-  },
-  {
-    label: "Error",
-    path: "*",
-    dynamic: false
-  }
-];
-export default function App() {
+function PageHeading({ children }: Props) {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="substates" element={<Substates />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-      </Routes>
-    </>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+      }}
+    >
+      <h1>{children}</h1>
+      <div
+        style={{
+          background: theme.palette.primary.main,
+          width: "100px",
+          height: "3px",
+        }}
+      ></div>
+    </div>
   );
 }
+
+export default PageHeading;

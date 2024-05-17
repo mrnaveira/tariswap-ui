@@ -20,41 +20,83 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./App.css";
+import { createTheme } from "@mui/material/styles";
 
-import { Routes, Route } from "react-router-dom";
-import ErrorPage from "./routes/ErrorPage";
-import Layout from "./theme/LayoutMain";
-import Home from "./routes/home";
-import Substates from "./routes/substates";
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#9330FF",
+    },
+    secondary: {
+      main: "#40388A",
+    },
+  },
+  shape: {
+    borderRadius: 10,
+  },
+  typography: {
+    fontFamily: '"AvenirMedium", sans-serif',
+    body1: {
+      color: "#000000",
+    },
+    body2: {
+      color: "#000000",
+      lineHeight: "1.5rem",
+    },
+    h1: {
+      fontSize: "2.2rem",
+      lineHeight: "3.2rem",
+    },
+    h2: {
+      fontSize: "1.9rem",
+      lineHeight: "2.9rem",
+    },
+    h3: {
+      fontSize: "1.6rem",
+      lineHeight: "2.6rem",
+    },
+    h4: {
+      fontSize: "1.3rem",
+      lineHeight: "2.3rem",
+    },
+    h5: {
+      fontSize: "1rem",
+      lineHeight: "2em",
+    },
+    h6: {
+      fontSize: "0.875rem",
+      lineHeight: "1.8rem",
+    },
+  },
+  transitions: {
+    duration: {
+      enteringScreen: 500,
+      leavingScreen: 500,
+    },
+  },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableRipple: true,
+        sx: {
+          minHeight: "55px",
+          boxShadow: "none",
+          textTransform: "none",
+          fontSize: "1rem",
+          fontWeight: 500,
+          fontFamily: '"AvenirMedium", sans-serif',
+          letterSpacing: "0.5px",
+        },
+      },
+    },
+    MuiTableCell: {
+      defaultProps: {
+        sx: {
+          borderBottom: "1px solid #f5f5f5",
+        },
+      },
+    },
+  },
+});
 
-export const breadcrumbRoutes = [
-  {
-    label: "Home",
-    path: "/",
-    dynamic: false
-  },
-  {
-    label: "Substates",
-    path: "/substates",
-    dynamic: false,
-  },
-  {
-    label: "Error",
-    path: "*",
-    dynamic: false
-  }
-];
-export default function App() {
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="substates" element={<Substates />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-      </Routes>
-    </>
-  );
-}
+export default theme;

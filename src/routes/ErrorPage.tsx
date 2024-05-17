@@ -20,41 +20,45 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./App.css";
+import { useRouteError } from "react-router-dom";
+import { StyledPaper } from "../components/StyledComponents";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Container from "@mui/material/Container";
 
-import { Routes, Route } from "react-router-dom";
-import ErrorPage from "./routes/ErrorPage";
-import Layout from "./theme/LayoutMain";
-import Home from "./routes/home";
-import Substates from "./routes/substates";
+type ErrorType = { message: string } | { statusText: string } | string | null;
 
-export const breadcrumbRoutes = [
-  {
-    label: "Home",
-    path: "/",
-    dynamic: false
-  },
-  {
-    label: "Substates",
-    path: "/substates",
-    dynamic: false,
-  },
-  {
-    label: "Error",
-    path: "*",
-    dynamic: false
+export default function ErrorPage() {
+  const error = useRouteError() as ErrorType;
+  console.error(error);
+
+  const getErrorText = (e: ErrorType): string => {
+    let value = (e as any);
+    return value?.message || value?.statusText || value || "Unknown error";
   }
-];
-export default function App() {
+
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="substates" element={<Substates />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-      </Routes>
-    </>
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        justifyContent: "center",
+        alignItems: "center"
+      }}
+    >
+      <Container>
+        <Grid container spacing={5}>
+          <Grid item xs={12} md={12} lg={12}>
+            <StyledPaper sx={{ textAlign: "center" }}>
+              <Typography variant="h3">Oops!</Typography>
+              <Typography>Sorry, an unexpected error has occurred.</Typography>
+              <Typography>
+                <i>{getErrorText(error)}</i>
+              </Typography>{" "}
+            </StyledPaper>
+          </Grid>
+        </Grid>
+      </Container>
+    </div>
   );
 }

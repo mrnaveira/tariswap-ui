@@ -1,15 +1,38 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom/client';
-import { ThemeProvider } from '@emotion/react';
-import { CssBaseline } from '@mui/material';
-import theme from './theme';
-import App from './App';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./theme/theme.css";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import App from "./App";
+import ErrorPage from "./routes/ErrorPage";
+import Substates from "./routes/substates";
+import { TariProvider, MetaMaskInpageProvider } from "@tariproject/tarijs";
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+const router = createBrowserRouter([
+  {
+    path: "*",
+    element: <App />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "substates",
+        element: <Substates />,
+      }
+    ],
+  },
+]);
+
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );
+
+
+declare global {
+
+  interface Window {
+    tari: TariProvider;
+    ethereum: MetaMaskInpageProvider;
+  }
+}

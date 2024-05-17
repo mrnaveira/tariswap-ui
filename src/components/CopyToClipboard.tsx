@@ -20,41 +20,47 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./App.css";
+import { useState } from "react";
+import Snackbar from "@mui/material/Snackbar";
+import IconButton from "@mui/material/IconButton";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import Tooltip from "@mui/material/Tooltip";
 
-import { Routes, Route } from "react-router-dom";
-import ErrorPage from "./routes/ErrorPage";
-import Layout from "./theme/LayoutMain";
-import Home from "./routes/home";
-import Substates from "./routes/substates";
+interface CopyProps {
+  copy: string;
+}
 
-export const breadcrumbRoutes = [
-  {
-    label: "Home",
-    path: "/",
-    dynamic: false
-  },
-  {
-    label: "Substates",
-    path: "/substates",
-    dynamic: false,
-  },
-  {
-    label: "Error",
-    path: "*",
-    dynamic: false
-  }
-];
-export default function App() {
+const CopyToClipboard = ({ copy }: CopyProps) => {
+  const [open, setOpen] = useState(false);
+  const handleClick = (copyThis: string) => {
+    setOpen(true);
+    navigator.clipboard.writeText(copyThis);
+  };
+
   return (
     <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="substates" element={<Substates />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-      </Routes>
+      <IconButton
+        onClick={() => handleClick(copy)}
+        size="small"
+        aria-label="copy to clipboard"
+        style={{
+          // float: 'right',
+          marginLeft: "10px",
+        }}
+      >
+        <Tooltip title={copy} arrow>
+          <ContentCopyIcon
+            color="primary"
+            style={{
+              width: "16px",
+              height: "16px",
+            }}
+          />
+        </Tooltip>
+      </IconButton>
+      <Snackbar open={open} onClose={() => setOpen(false)} autoHideDuration={2000} message="Copied to clipboard" />
     </>
   );
-}
+};
+
+export default CopyToClipboard;

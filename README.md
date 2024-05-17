@@ -1,38 +1,21 @@
-# tariswap-ui
+# Tari Template Website
 
-This project implements a web interface using [Vite](https://vitejs.de) for the `tariswap` template in the [Tari network](https://github.com/tari-project/tari-dan).
+UNDER DEVELOPMENT 
 
-The `tariswap` template implements a decentralized exchange smart contract on the Tari network, using a constant-product automated market maker. It allows swapping tokens, adding liquidity and removing liquidity.
+Provides a basic Vite + React interface to construct and submit transactions from a given WASM template address.
 
-## Getting started
+Currently, only the wallet JSON-RPC interface is supported.
 
-### tari-connector npm dependency
-The `tari-connector` package must be installed in the global `npm` folder. To do it:
-* Clone the `tari-connector` repository
-* Run `npm install`
-* Run `npm link`
+### TODO
 
-### Tari network
-A Tari network must be running with the following requisites:
-* All basic pieces running and connected: base node, wallet, validator node (registered) and indexer.
-* A `tari_signaling_server` must be running and connected to a `tari_dan_wallet_daemon`.
-* A `tariswap` component must have been created, that represents a swap pool of two different resources.
-* An account created in the wallet daemon, with enough balance to perform the actions (swap, add/remove liquidity).
+- [x] Add support for [Tari snap](https://github.com/tari-project/tari-snap)
+- [ ] Support for dry-runs
+- [ ] Support for transaction fee estimation
+- [ ] Improved handling of argument and return types (e.g. Proof, Bucket etc)
+- [ ] Improved badge usage
+- [ ] Dashboard that displays well-formatted data from managed components
+- [ ] Previous transactions list
+- [ ] Customization of transactions before submitting
+- [ ] UX
 
-### Environment variables
-This project uses [dotenv](https://github.com/motdotla/dotenv) to specify the configuration needed.
-
-The `.env.example` file contains an example with all required environment variables and a description. You will need to create a copy of that file to a new `.env` file and modify there the values to match your Tari network. The `.env` is particular for each developer, so it's ignored in `.gitignored` and never uploaded into the repository.
-
-Check [the ViteJs documentation](https://vitejs.dev/guide/env-and-mode.html) for more information on environment variables.
-
-### Run the Tariswap UI
-With all previous prerequisites in order, in this project's folder (`tariswap-ui`) run:
-```
-npm install
-npm link tari-connector
-npm run dev
-```
-
-And finally open the browser in the indicated URL being displayed in then console
 

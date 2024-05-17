@@ -20,41 +20,42 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./App.css";
+import { toHexString } from "@tariproject/tarijs/dist/utils";
 
-import { Routes, Route } from "react-router-dom";
-import ErrorPage from "./routes/ErrorPage";
-import Layout from "./theme/LayoutMain";
-import Home from "./routes/home";
-import Substates from "./routes/substates";
-
-export const breadcrumbRoutes = [
-  {
-    label: "Home",
-    path: "/",
-    dynamic: false
-  },
-  {
-    label: "Substates",
-    path: "/substates",
-    dynamic: false,
-  },
-  {
-    label: "Error",
-    path: "*",
-    dynamic: false
+export const renderJson = (json: any) => {
+  if (Array.isArray(json)) {
+    if (json.length == 32) {
+      return <span className="string">"{toHexString(json)}"</span>;
+    }
+    return (
+      <>
+        [
+        <ol>
+          {json.map((val, index) => (
+            <li key={index}>{renderJson(val)},</li>
+          ))}
+        </ol>
+        ],
+      </>
+    );
+  } else if (typeof json === "object") {
+    return (
+      <>
+        {"{"}
+        <ul>
+          {Object.keys(json).map((key, index) => (
+            <li key={index}>
+              <b>"{key}"</b>:{renderJson(json[key])}
+            </li>
+          ))}
+        </ul>
+        {"}"}
+      </>
+    );
+  } else {
+    if (typeof json === "string") return <span className="string">"{json}"</span>;
+    return <span className="other">{json}</span>;
   }
-];
-export default function App() {
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="substates" element={<Substates />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-      </Routes>
-    </>
-  );
-}
+};
+
+

@@ -20,41 +20,29 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./App.css";
+import {create} from "zustand";
+import {createJSONStorage, persist} from "zustand/middleware";
 
-import { Routes, Route } from "react-router-dom";
-import ErrorPage from "./routes/ErrorPage";
-import Layout from "./theme/LayoutMain";
-import Home from "./routes/home";
-import Substates from "./routes/substates";
-
-export const breadcrumbRoutes = [
-  {
-    label: "Home",
-    path: "/",
-    dynamic: false
-  },
-  {
-    label: "Substates",
-    path: "/substates",
-    dynamic: false,
-  },
-  {
-    label: "Error",
-    path: "*",
-    dynamic: false
-  }
-];
-export default function App() {
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="substates" element={<Substates />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-      </Routes>
-    </>
-  );
+export interface Settings {
+    template: string | null;
 }
+
+export interface SettingsStore {
+    settings: Settings,
+    setSettings(settings: Settings): void;
+}
+
+const useSettings = create<SettingsStore>()(
+    persist<SettingsStore>(
+        (set) => ({
+            settings: {template: null},
+            setSettings(settings) { set({settings}) },
+        }),
+        {
+            name: "settings",
+            storage: createJSONStorage(() => localStorage),
+        },
+    ),
+);
+
+export default useSettings;
