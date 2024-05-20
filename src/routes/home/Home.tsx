@@ -40,6 +40,7 @@ function Home() {
     const FAUCET_SUPPLY: number = 1_000_000;
     const faucet_template: string = import.meta.env.VITE_FAUCET_TEMPLATE;
     const pool_index_template: string = import.meta.env.VITE_POOL_INDEX_TEMPLATE;
+    const pool_template: string = import.meta.env.VITE_POOL_TEMPLATE;
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
 
     const {provider} = useTariProvider();
@@ -99,7 +100,7 @@ function Home() {
         };
 
         const args = {
-            pool_template: pool_index_template,
+            pool_template: pool_template,
             market_fee: 10,
         }
 
