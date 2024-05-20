@@ -59,6 +59,11 @@ function Home() {
     const [addLiquidityResourceB, setAddLiquidityResourceB] = useState<string | null>(null);
     const [addLiquidityResourceB_amount, setAddLiquidityResourceB_amount] = useState<number | null>(null);
 
+    const [swapComponent, setSwapComponent] = useState<string | null>(null);
+    const [swapResource, setSwapResource] = useState<string | null>(null);
+    const [swapResource_amount, setSwapResource_amount] = useState<number | null>(null);
+    const [swapOutputResource, setSwapOutputResource] = useState<string | null>(null);
+
     const {settings, setSettings} = useSettings();
     
 
@@ -274,8 +279,6 @@ function Home() {
         if (provider === null) {
             throw new Error('Provider is not initialized');
         }
-    
-        console.log({addLiquidityComponent, addLiquidityResourceA, addLiquidityResourceA_amount, addLiquidityResourceB, addLiquidityResourceB_amount});
 
         // TODO: wrap into an utility function inside the "wallet.ts" file
         const fee = 2000;
@@ -338,6 +341,80 @@ function Home() {
         const required_substates = [
             {substate_id: account.address},
             {substate_id: addLiquidityComponent}
+        ];
+        const req: SubmitTransactionRequest = {
+            account_id: account.account_id,
+            fee_instructions,
+            instructions: instructions as object[],
+            inputs: [],
+            input_refs: [],
+            required_substates,
+            is_dry_run: false,
+            min_epoch: null,
+            max_epoch: null
+        };
+
+        const resp = await provider.submitTransaction(req);
+
+        let result = await wallet.waitForTransactionResult(provider, resp.transaction_id);
+
+        console.log(result);
+    }
+
+    const handleSwap = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+    
+        // TODO: wrap into an utility function inside the "wallet.ts" file
+        const fee = 2000;
+        const account = await provider.getAccount();
+        const fee_instructions = [
+            {
+                CallMethod: {
+                    component_address: account.address,
+                    method: "pay_fee",
+                    args: [`Amount(${fee})`]
+                }
+            }
+        ];
+        const instructions = [
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "withdraw",
+                    "args": [swapResource, swapResource_amount.toString()]
+                }
+            },
+            {
+                "PutLastInstructionOutputOnWorkspace": {
+                    "key": [0]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": swapComponent,
+                    "method": "swap",
+                    "args": [
+                        { "Workspace": [0] }, swapOutputResource]
+                }
+            },
+            {
+                "PutLastInstructionOutputOnWorkspace": {
+                    "key": [1]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "deposit",
+                    "args": [{ "Workspace": [1] }]
+                }
+            }
+        ];
+        const required_substates = [
+            {substate_id: account.address},
+            {substate_id: swapComponent}
         ];
         const req: SubmitTransactionRequest = {
             account_id: account.account_id,
@@ -464,6 +541,22 @@ function Home() {
         setAddLiquidityResourceB_amount(event.target.value);
     };
 
+    const handleSwapComponent = async (event) => {
+        setSwapComponent(event.target.value);
+    };
+
+    const handleSwapResource = async (event) => {
+        setSwapResource(event.target.value);
+    };
+
+    const handleSwapResource_amount = async (event) => {
+        setSwapResource_amount(event.target.value);
+    };
+
+    const handleSwapOutputResource = async (event) => {
+        setSwapOutputResource(event.target.value);
+    };
+
     return <HomeLayout error={error} settings={settings} onCreateFreeTestCoins={async () => {
         await wallet.createFreeTestCoins(provider)
     }} setSettings={onSaveSettings}>
@@ -552,6 +645,37 @@ function Home() {
                 </Stack>
             </Stack>
             <Button onClick={async () => { await handleAddLiquidity(); }}>Add liquidity</Button>
+        </Box>
+        <Box sx={{ padding: 5, borderRadius: 4 }}>
+            <Stack direction="column" justifyContent="space-between" spacing={2}>
+                <TextField sx={{ mt: 1, width: '100%' }} id="swapComponent" placeholder="Pool component address"
+                        onChange={handleSwapComponent}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+                <Stack direction="row" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '70%' }} id="swapResource" placeholder="Input resource address"
+                        onChange={handleSwapResource}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                    <TextField sx={{ mt: 1, width: '30%' }} id="swapResource_amount" placeholder="0"
+                        onChange={handleSwapResource_amount}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                </Stack>
+                <TextField sx={{ mt: 1, width: '100%' }} id="swapOutputResource" placeholder="Output resource address"
+                        onChange={handleSwapOutputResource}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+            </Stack>
+            <Button onClick={async () => { await handleSwap(); }}>Swap</Button>
         </Box>
     </HomeLayout>;
 }
