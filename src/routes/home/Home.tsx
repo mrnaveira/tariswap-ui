@@ -34,7 +34,7 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import useSettings from "../../store/settings.ts";
 import useTariProvider from "../../store/provider.ts";
-import * as cbor from "../../cbor.ts";
+import * as tariswap from "../../tariswap.ts";
 import { SubmitTransactionRequest } from "@tariproject/tarijs";
 
 function Home() {
@@ -92,44 +92,6 @@ function Home() {
     const onSaveSettings = (settings: Settings) => {
         localStorage.setItem("settings", JSON.stringify(settings));
         setSettings(settings);
-    }
-
-    const handleCreateIndexComponent = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-
-        const func: FunctionDef = {
-            name: "new",
-            arguments: [
-                {
-                    name: "pool_template",
-                    arg_type: { Other: {name: "TemplateAddress"}},
-                },
-                {
-                    name: "market_fee",
-                    arg_type: "U16"
-                }
-            ],
-            output: { Other: {name: "Component"}},
-            is_mut: false,
-        };
-
-        const args = {
-            pool_template: pool_template,
-            market_fee: 10,
-        }
-
-        const result = await wallet.buildInstructionsAndSubmit(
-            provider,
-            settings,
-            null,
-            null,
-            func,
-            args,
-        );
-        
-        console.log({ result });
     }
 
     const handleCreateToken = async () => {
@@ -209,315 +171,53 @@ function Home() {
         console.log({ result });
     }
 
+    const handleCreateIndexComponent = async () => {
+        //TODO: constant?
+        const market_fee = 10;
+        const result = await tariswap.createPoolIndex(provider, pool_index_template, market_fee);
+        console.log({ result });
+    }
+
     const handleCreatePool = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-
-        const settings: Settings = {
-            template: pool_index_template
-        };
-
-        const func: FunctionDef = {
-            name: "create_pool",
-            arguments: [
-                {
-                    name: "self",
-                    arg_type: { Other: {name: "&mut self"}},
-                },
-                {
-                    name: "a_addr",
-                    arg_type: { Other: {name: "ResourceAddress"}},
-                },
-                {
-                    name: "b_addr",
-                    arg_type: { Other: {name: "ResourceAddress"}},
-                },
-            ],
-            output: { Other: {name: "Component"}},
-            is_mut: true,
-        };
-
-        const args = {
-            a_addr: tokenA,
-            b_addr: tokenB,
-        }
-
-        const result = await wallet.buildInstructionsAndSubmit(
-            provider,
-            settings,
-            null,
-            pool_index_component,
-            func,
-            args,
-        );
-        
+        const result = await tariswap.createPool(provider, pool_index_template, pool_index_component, tokenA, tokenB);
         console.log({ result });
     }
 
     const handleListPools = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-
-        const substate = await wallet.getSubstate(provider, pool_index_component);
-
-        // extract the map of pools from the index substate
-        const component_body = substate.value.substate.Component.body.state.Map;
-        const pools_field = component_body.find((field) => field[0].Text == "pools")
-        const pools_value = pools_field[1].Map;
-
-        // extract the resource addresses and the pool component for each pool
-        const pool_data = pools_value.map(value => {
-            const resource_pair = value[0].Array;
-            const resourceA = cbor.convertCborValue(resource_pair[0]);
-            const resourceB = cbor.convertCborValue(resource_pair[1]);
-            const poolComponent = cbor.convertCborValue(value[1]);
-            return {resourceA, resourceB, poolComponent};
-        });
-    
-        console.log(pool_data);
+        const pools = await tariswap.listPools(provider, pool_index_component);
+        console.log(pools);
     }
 
     const handleAddLiquidity = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-
-        // TODO: wrap into an utility function inside the "wallet.ts" file
-        const fee = 2000;
-        const account = await provider.getAccount();
-        const fee_instructions = [
-            {
-                CallMethod: {
-                    component_address: account.address,
-                    method: "pay_fee",
-                    args: [`Amount(${fee})`]
-                }
-            }
-        ];
-        const instructions = [
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "withdraw",
-                    "args": [addLiquidityResourceA, addLiquidityResourceA_amount.toString()]
-                }
-            },
-            {
-                "PutLastInstructionOutputOnWorkspace": {
-                    "key": [0]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "withdraw",
-                    "args": [addLiquidityResourceB, addLiquidityResourceB_amount.toString()]
-                }
-            },
-            {
-                "PutLastInstructionOutputOnWorkspace": {
-                    "key": [1]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": addLiquidityComponent,
-                    "method": "add_liquidity",
-                    "args": [
-                        { "Workspace": [0] }, { "Workspace": [1] }]
-                }
-            },
-            {
-                "PutLastInstructionOutputOnWorkspace": {
-                    "key": [2]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "deposit",
-                    "args": [{ "Workspace": [2] }]
-                }
-            }
-        ];
-        const required_substates = [
-            {substate_id: account.address},
-            {substate_id: addLiquidityComponent}
-        ];
-        const req: SubmitTransactionRequest = {
-            account_id: account.account_id,
-            fee_instructions,
-            instructions: instructions as object[],
-            inputs: [],
-            input_refs: [],
-            required_substates,
-            is_dry_run: false,
-            min_epoch: null,
-            max_epoch: null
-        };
-
-        const resp = await provider.submitTransaction(req);
-
-        let result = await wallet.waitForTransactionResult(provider, resp.transaction_id);
-
+        const result = await tariswap.addLiquidity(
+            provider,
+            addLiquidityComponent,
+            addLiquidityResourceA,
+            addLiquidityResourceA_amount,
+            addLiquidityResourceB, 
+            addLiquidityResourceB_amount
+        );
         console.log(result);
     }
 
     const handleRemoveLiquidity = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-
-        // TODO: wrap into an utility function inside the "wallet.ts" file
-        const fee = 2000;
-        const account = await provider.getAccount();
-        const fee_instructions = [
-            {
-                CallMethod: {
-                    component_address: account.address,
-                    method: "pay_fee",
-                    args: [`Amount(${fee})`]
-                }
-            }
-        ];
-        const instructions = [
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "withdraw",
-                    "args": [removeLiquidityResource, removeLiquidityAmount.toString()]
-                }
-            },
-            {
-                "PutLastInstructionOutputOnWorkspace": {
-                    "key": [108, 112, 95, 98, 117, 99, 107, 101, 116]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": removeLiquidityComponent,
-                    "method": "remove_liquidity",
-                    "args": [
-                        { "Workspace": [108, 112, 95, 98, 117, 99, 107, 101, 116] }
-                    ]
-                }
-            },
-            {
-                "PutLastInstructionOutputOnWorkspace": {
-                    "key": [112, 111, 111, 108, 95, 98, 117, 99, 107, 101, 116, 115]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "deposit",
-                    "args": [{ "Workspace": [112, 111, 111, 108, 95, 98, 117, 99, 107, 101, 116, 115, 46, 48] }]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "deposit",
-                    "args": [{ "Workspace": [112, 111, 111, 108, 95, 98, 117, 99, 107, 101, 116, 115, 46, 49] }]
-                }
-            }
-        ];
-        const required_substates = [
-            {substate_id: account.address},
-            {substate_id: removeLiquidityComponent}
-        ];
-        const req: SubmitTransactionRequest = {
-            account_id: account.account_id,
-            fee_instructions,
-            instructions: instructions as object[],
-            inputs: [],
-            input_refs: [],
-            required_substates,
-            is_dry_run: false,
-            min_epoch: null,
-            max_epoch: null
-        };
-
-        const resp = await provider.submitTransaction(req);
-
-        let result = await wallet.waitForTransactionResult(provider, resp.transaction_id);
-
+        const result = await tariswap.removeLiquidity(
+            provider,
+            removeLiquidityComponent,
+            removeLiquidityResource,
+            removeLiquidityAmount,
+        );
         console.log(result);
     }
 
     const handleSwap = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-    
-        // TODO: wrap into an utility function inside the "wallet.ts" file
-        const fee = 2000;
-        const account = await provider.getAccount();
-        const fee_instructions = [
-            {
-                CallMethod: {
-                    component_address: account.address,
-                    method: "pay_fee",
-                    args: [`Amount(${fee})`]
-                }
-            }
-        ];
-        const instructions = [
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "withdraw",
-                    "args": [swapResource, swapResource_amount.toString()]
-                }
-            },
-            {
-                "PutLastInstructionOutputOnWorkspace": {
-                    "key": [0]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": swapComponent,
-                    "method": "swap",
-                    "args": [
-                        { "Workspace": [0] }, swapOutputResource]
-                }
-            },
-            {
-                "PutLastInstructionOutputOnWorkspace": {
-                    "key": [1]
-                }
-            },
-            {
-                "CallMethod": {
-                    "component_address": account.address,
-                    "method": "deposit",
-                    "args": [{ "Workspace": [1] }]
-                }
-            }
-        ];
-        const required_substates = [
-            {substate_id: account.address},
-            {substate_id: swapComponent}
-        ];
-        const req: SubmitTransactionRequest = {
-            account_id: account.account_id,
-            fee_instructions,
-            instructions: instructions as object[],
-            inputs: [],
-            input_refs: [],
-            required_substates,
-            is_dry_run: false,
-            min_epoch: null,
-            max_epoch: null
-        };
-
-        const resp = await provider.submitTransaction(req);
-
-        let result = await wallet.waitForTransactionResult(provider, resp.transaction_id);
-
+        const result = await tariswap.swap(
+            provider,
+            swapComponent,
+            swapResource,
+            swapResource_amount,
+            swapOutputResource
+        );
         console.log(result);
     }
 
