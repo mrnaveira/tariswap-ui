@@ -1,21 +1,17 @@
-# Tari Template Website
+# tariswap-ui
 
-UNDER DEVELOPMENT 
+This project implements a web interface using [Vite](https://vitejs.de) for the [`tariswap`](https://github.com/tari-project/test-templates) Tari template.
 
-Provides a basic Vite + React interface to construct and submit transactions from a given WASM template address.
+The `tariswap` template implements a decentralized exchange smart contract on the Tari network, using a constant-product automated market maker. It allows swapping tokens, adding liquidity and removing liquidity.
 
-Currently, only the wallet JSON-RPC interface is supported.
+# Getting Started
 
-### TODO
+Copy the `.env.example` file to `.env` and edit the correct environment variable values.
 
-- [x] Add support for [Tari snap](https://github.com/tari-project/tari-snap)
-- [ ] Support for dry-runs
-- [ ] Support for transaction fee estimation
-- [ ] Improved handling of argument and return types (e.g. Proof, Bucket etc)
-- [ ] Improved badge usage
-- [ ] Dashboard that displays well-formatted data from managed components
-- [ ] Previous transactions list
-- [ ] Customization of transactions before submitting
-- [ ] UX
+To run the web:
+```shell
+npm install
+npm run dev
+```
 
 
