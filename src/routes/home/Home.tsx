@@ -27,7 +27,6 @@ import SecondaryHeading from "../../components/SecondaryHeading";
 import {FinalizeResult, FunctionDef, TemplateDef} from "@tariproject/wallet_jrpc_client";
 import {useState, useEffect} from "react";
 import SettingsForm, {Settings} from "./SettingsForm.tsx";
-import CallTemplateForm from "../../components/CallTemplateForm.tsx";
 import {Error} from "@mui/icons-material";
 import * as wallet from "../../wallet.ts";
 import {Alert, Box, CircularProgress, Divider, IconButton, Stack, TextField, Typography} from "@mui/material";
@@ -35,6 +34,7 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import useSettings from "../../store/settings.ts";
 import useTariProvider from "../../store/provider.ts";
+import * as cbor from "../../cbor.ts";
 
 function Home() {
     const FAUCET_SUPPLY: number = 1_000_000;
@@ -176,7 +176,7 @@ function Home() {
                 },
             ],
             output: { Other: {name: "Bucket"}},
-            is_mut: false,
+            is_mut: true,
         };
 
         const args = {};
@@ -219,7 +219,7 @@ function Home() {
                 },
             ],
             output: { Other: {name: "Component"}},
-            is_mut: false,
+            is_mut: true,
         };
 
         const args = {
@@ -237,6 +237,30 @@ function Home() {
         );
         
         console.log({ result });
+    }
+
+    const handleListPools = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+
+        const substate = await wallet.getSubstate(provider, pool_index_component);
+
+        // extract the map of pools from the index substate
+        const component_body = substate.value.substate.Component.body.state.Map;
+        const pools_field = component_body.find((field) => field[0].Text == "pools")
+        const pools_value = pools_field[1].Map;
+
+        // extract the resource addresses and the pool component for each pool
+        const pool_data = pools_value.map(value => {
+            const resource_pair = value[0].Array;
+            const resourceA = cbor.convertCborValue(resource_pair[0]);
+            const resourceB = cbor.convertCborValue(resource_pair[1]);
+            const poolComponent = cbor.convertCborValue(value[1]);
+            return {resourceA, resourceB, poolComponent};
+        });
+    
+        console.log(pool_data);
     }
 
     useEffect(() => {
@@ -372,6 +396,8 @@ function Home() {
             </Stack>
             <Button onClick={async () => { await handleCreatePool(); }}>Create pool</Button>
         </Box>
+        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
+        <Button onClick={async () => { await handleListPools(); }}>List pools</Button>
     </HomeLayout>;
 }
 
