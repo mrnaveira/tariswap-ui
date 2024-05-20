@@ -6,7 +6,7 @@ import {
     Arg,
 } from "@tariproject/wallet_jrpc_client";
 
-import { TariProvider, MetamaskTariProvider, WalletDaemonTariProvider, TransactionStatus, SubmitTransactionRequest } from "@tariproject/tarijs";
+import { TariProvider, MetamaskTariProvider, WalletDaemonTariProvider, TransactionStatus, SubmitTransactionRequest, Account, SubstateRequirement } from "@tariproject/tarijs";
 
 export async function getTemplateDefinition<T extends TariProvider>(
     provider: T,
@@ -71,6 +71,36 @@ export async function buildInstructionsAndSubmit(
         func,
         args
     );
+
+    const resp = await provider.submitTransaction(req);
+
+    let result = await waitForTransactionResult(provider, resp.transaction_id);
+
+    return result;
+}
+
+export async function submitAndWaitForTransaction(provider: TariProvider, account: Account, instructions: object[], required_substates: SubstateRequirement[]) {
+    const fee = 2000;
+    const fee_instructions = [
+        {
+            CallMethod: {
+                component_address: account.address,
+                method: "pay_fee",
+                args: [`Amount(${fee})`]
+            }
+        }
+    ];
+    const req: SubmitTransactionRequest = {
+        account_id: account.account_id,
+        fee_instructions,
+        instructions: instructions as object[],
+        inputs: [],
+        input_refs: [],
+        required_substates,
+        is_dry_run: false,
+        min_epoch: null,
+        max_epoch: null
+    };
 
     const resp = await provider.submitTransaction(req);
 

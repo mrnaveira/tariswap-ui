@@ -28,14 +28,14 @@ import {FinalizeResult, FunctionDef, TemplateDef} from "@tariproject/wallet_jrpc
 import {useState, useEffect} from "react";
 import SettingsForm, {Settings} from "./SettingsForm.tsx";
 import {Error} from "@mui/icons-material";
-import * as wallet from "../../wallet.ts";
 import {Alert, Box, CircularProgress, Divider, IconButton, Stack, TextField, Typography} from "@mui/material";
 import * as React from "react";
 import Button from "@mui/material/Button";
 import useSettings from "../../store/settings.ts";
 import useTariProvider from "../../store/provider.ts";
+import * as wallet from "../../wallet.ts";
 import * as tariswap from "../../tariswap.ts";
-import { SubmitTransactionRequest } from "@tariproject/tarijs";
+import * as faucet from "../../faucet.ts";
 
 function Home() {
     const FAUCET_SUPPLY: number = 1_000_000;
@@ -95,91 +95,24 @@ function Home() {
     }
 
     const handleCreateToken = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-
-        const settings: Settings = {
-            template: faucet_template
-        };
-
-        const func: FunctionDef = {
-            name: "mint_with_symbol",
-            arguments: [
-                {
-                    name: "initial_supply",
-                    arg_type: { Other: {name: "Amount"}},
-                },
-                {
-                    name: "symbol",
-                    arg_type: "String",
-                },
-            ],
-            output: { Other: {name: "Component"}},
-            is_mut: false,
-        };
-
-        const args = {
-            initial_supply: `Amount(${FAUCET_SUPPLY})`,
-            symbol: newTokenName,
-        }
-
-        const result = await wallet.buildInstructionsAndSubmit(
-            provider,
-            settings,
-            null,
-            null,
-            func,
-            args,
-        );
-        
+        const result = await faucet.createFaucet(provider, faucet_template, FAUCET_SUPPLY, newTokenName);
         console.log({ result });
     }
 
     const handleGetTokens = async () => {
-        if (provider === null) {
-            throw new Error('Provider is not initialized');
-        }
-
-        const settings: Settings = {
-            template: faucetComponent
-        };
-
-        const func: FunctionDef = {
-            name: "take_free_coins",
-            arguments: [
-                {
-                    name: "self",
-                    arg_type: { Other: {name: "&mut self"}},
-                },
-            ],
-            output: { Other: {name: "Bucket"}},
-            is_mut: true,
-        };
-
-        const args = {};
-
-        const result = await wallet.buildInstructionsAndSubmit(
-            provider,
-            settings,
-            null,
-            faucetComponent,
-            func,
-            args,
-        );
-        
+        const result = await faucet.takeFreeCoins(provider, faucetComponent);
         console.log({ result });
     }
 
     const handleCreateIndexComponent = async () => {
         //TODO: constant?
         const market_fee = 10;
-        const result = await tariswap.createPoolIndex(provider, pool_index_template, market_fee);
+        const result = await tariswap.createPoolIndex(provider, pool_index_template, pool_template, market_fee);
         console.log({ result });
     }
 
     const handleCreatePool = async () => {
-        const result = await tariswap.createPool(provider, pool_index_template, pool_index_component, tokenA, tokenB);
+        const result = await tariswap.createPool(provider, pool_index_component, tokenA, tokenB);
         console.log({ result });
     }
 

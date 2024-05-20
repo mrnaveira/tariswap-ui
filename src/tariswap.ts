@@ -1,86 +1,48 @@
-import { Account, SubmitTransactionRequest, SubstateRequirement, TariProvider } from "@tariproject/tarijs";
+import { TariProvider } from "@tariproject/tarijs";
 import * as wallet from "./wallet.ts";
 import * as cbor from "./cbor.ts";
-import { Settings } from "./store/settings.ts";
-import { FunctionDef } from "@tariproject/typescript-bindings";
 
-export async function createPoolIndex(provider: TariProvider, pool_template: string, market_fee: number) {
-    const func: FunctionDef = {
-        name: "new",
-        arguments: [
-            {
-                name: "pool_template",
-                arg_type: { Other: {name: "TemplateAddress"}},
-            },
-            {
-                name: "market_fee",
-                arg_type: "U16"
+export async function createPoolIndex(provider: TariProvider, pool_index_template: string, pool_template: string, market_fee: number) {
+    const account = await provider.getAccount();
+    const instructions = [
+        {
+            "CallFunction": {
+                "template_address": pool_index_template,
+                "function": "new",
+                "args": [pool_template, market_fee]
             }
-        ],
-        output: { Other: {name: "Component"}},
-        is_mut: false,
-    };
+        }
+    ];
 
-    const args = {
-        pool_template: pool_template,
-        market_fee,
-    }
+    const required_substates = [
+        {substate_id: account.address},
+    ];
 
-    const settings = {
-        template: null
-    };
-
-    const result = await wallet.buildInstructionsAndSubmit(
-        provider,
-        settings,
-        null,
-        null,
-        func,
-        args,
-    );
-    
+    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    // result.result.transaction_id
+    // result.result.execution_results[0].indexed.value   (cbor encoded ComponentAddress)
     return result;
 }
 
-export async function createPool(provider: TariProvider, pool_index_template: string, pool_index_component: string, tokenA: string, tokenB: string) {
-    const settings: Settings = {
-        template: pool_index_template
-    };
+export async function createPool(provider: TariProvider, pool_index_component: string, tokenA: string, tokenB: string) {
+    const account = await provider.getAccount();
+    const instructions = [
+        {
+            "CallMethod": {
+                "component_address": pool_index_component,
+                "method": "create_pool",
+                "args": [tokenA, tokenB]
+            }
+        }
+    ];
 
-    const func: FunctionDef = {
-        name: "create_pool",
-        arguments: [
-            {
-                name: "self",
-                arg_type: { Other: {name: "&mut self"}},
-            },
-            {
-                name: "a_addr",
-                arg_type: { Other: {name: "ResourceAddress"}},
-            },
-            {
-                name: "b_addr",
-                arg_type: { Other: {name: "ResourceAddress"}},
-            },
-        ],
-        output: { Other: {name: "Component"}},
-        is_mut: true,
-    };
+    const required_substates = [
+        {substate_id: account.address},
+        {substate_id: pool_index_component},
+    ];
 
-    const args = {
-        a_addr: tokenA,
-        b_addr: tokenB,
-    }
+    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
-    const result = await wallet.buildInstructionsAndSubmit(
-        provider,
-        settings,
-        null,
-        pool_index_component,
-        func,
-        args,
-    );
-    
     return result;
 }
 
@@ -165,7 +127,7 @@ export async function addLiquidity(
         {substate_id: pool_component}
     ];
 
-    let result = await submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }
@@ -219,7 +181,7 @@ export async function removeLiquidity(provider: TariProvider, pool_component: st
         {substate_id: pool_component}
     ];
 
-    let result = await submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }
@@ -265,38 +227,7 @@ export async function swap(provider: TariProvider, pool_component: string, input
         {substate_id: pool_component}
     ];
 
-    let result = await submitAndWaitForTransaction(provider, account, instructions, required_substates);
-
-    return result;
-}
-
-// TODO: wrap into an utility function inside the "wallet.ts" file?
-async function submitAndWaitForTransaction(provider: TariProvider, account: Account, instructions: object[], required_substates: SubstateRequirement[]) {
-    const fee = 2000;
-    const fee_instructions = [
-        {
-            CallMethod: {
-                component_address: account.address,
-                method: "pay_fee",
-                args: [`Amount(${fee})`]
-            }
-        }
-    ];
-    const req: SubmitTransactionRequest = {
-        account_id: account.account_id,
-        fee_instructions,
-        instructions: instructions as object[],
-        inputs: [],
-        input_refs: [],
-        required_substates,
-        is_dry_run: false,
-        min_epoch: null,
-        max_epoch: null
-    };
-
-    const resp = await provider.submitTransaction(req);
-
-    let result = await wallet.waitForTransactionResult(provider, resp.transaction_id);
+    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }
