@@ -214,9 +214,9 @@ function Home() {
     }, [components, selectedComponent]);
 
     if (!provider) {
-        return <HomeLayout error={error} settings={settings} setSettings={onSaveSettings}>
+        return <Box>
             <pre>Please connect your wallet</pre>
-        </HomeLayout>;
+        </Box>;
     }
 
     if (!settings || !settings.template) {
@@ -288,9 +288,7 @@ function Home() {
         setSwapOutputResource(event.target.value);
     };
 
-    return <HomeLayout error={error} settings={settings} onCreateFreeTestCoins={async () => {
-        await wallet.createFreeTestCoins(provider)
-    }} setSettings={onSaveSettings}>
+    return <Box>
         {isLoading ? <CircularProgress/> : null}
         <Button onClick={async () => { await handleCreateIndexComponent(); }}>Create index component</Button>
         <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
@@ -433,42 +431,7 @@ function Home() {
             </Stack>
             <Button onClick={async () => { await handleSwap(); }}>Swap</Button>
         </Box>
-    </HomeLayout>;
-}
-
-
-interface LayoutProps {
-    error: string | null;
-    settings: Settings | null;
-    setSettings: (settings: Settings) => void;
-    onCreateFreeTestCoins?: () => void;
-    children: React.ReactNode;
-}
-
-function HomeLayout({error, settings, setSettings, onCreateFreeTestCoins, children}: LayoutProps) {
-    return (
-        <>
-            <Grid item sm={12} md={12} xs={12}>
-                <SecondaryHeading>Template</SecondaryHeading>
-            </Grid>
-            <Grid item xs={12} md={12} lg={12}>
-                {error && (
-                    <Alert icon={<Error/>} severity="error">
-                        {error}
-                    </Alert>
-                )}
-                <StyledPaper>
-                    {<Button disabled={!onCreateFreeTestCoins} onClick={onCreateFreeTestCoins}>Create Free Test Coins</Button>}
-                    {settings ? <SettingsForm settings={settings} onSave={setSettings}/> : <CircularProgress/>}
-                </StyledPaper>
-            </Grid>
-            <Grid item xs={12} md={12} lg={12}>
-                <StyledPaper>
-                    {children}
-                </StyledPaper>
-            </Grid>
-        </>
-    )
+    </Box>;
 }
 
 
