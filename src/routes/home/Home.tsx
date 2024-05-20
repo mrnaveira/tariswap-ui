@@ -59,6 +59,10 @@ function Home() {
     const [addLiquidityResourceB, setAddLiquidityResourceB] = useState<string | null>(null);
     const [addLiquidityResourceB_amount, setAddLiquidityResourceB_amount] = useState<number | null>(null);
 
+    const [removeLiquidityComponent, setRemoveLiquidityComponent] = useState<string | null>(null);
+    const [removeLiquidityResource, setRemoveLiquidityResource] = useState<string | null>(null);
+    const [removeLiquidityAmount, setRemoveLiquidityAmount] = useState<number | null>(null);
+
     const [swapComponent, setSwapComponent] = useState<string | null>(null);
     const [swapResource, setSwapResource] = useState<string | null>(null);
     const [swapResource_amount, setSwapResource_amount] = useState<number | null>(null);
@@ -361,6 +365,88 @@ function Home() {
         console.log(result);
     }
 
+    const handleRemoveLiquidity = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+
+        // TODO: wrap into an utility function inside the "wallet.ts" file
+        const fee = 2000;
+        const account = await provider.getAccount();
+        const fee_instructions = [
+            {
+                CallMethod: {
+                    component_address: account.address,
+                    method: "pay_fee",
+                    args: [`Amount(${fee})`]
+                }
+            }
+        ];
+        const instructions = [
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "withdraw",
+                    "args": [removeLiquidityResource, removeLiquidityAmount.toString()]
+                }
+            },
+            {
+                "PutLastInstructionOutputOnWorkspace": {
+                    "key": [108, 112, 95, 98, 117, 99, 107, 101, 116]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": removeLiquidityComponent,
+                    "method": "remove_liquidity",
+                    "args": [
+                        { "Workspace": [108, 112, 95, 98, 117, 99, 107, 101, 116] }
+                    ]
+                }
+            },
+            {
+                "PutLastInstructionOutputOnWorkspace": {
+                    "key": [112, 111, 111, 108, 95, 98, 117, 99, 107, 101, 116, 115]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "deposit",
+                    "args": [{ "Workspace": [112, 111, 111, 108, 95, 98, 117, 99, 107, 101, 116, 115, 46, 48] }]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "deposit",
+                    "args": [{ "Workspace": [112, 111, 111, 108, 95, 98, 117, 99, 107, 101, 116, 115, 46, 49] }]
+                }
+            }
+        ];
+        const required_substates = [
+            {substate_id: account.address},
+            {substate_id: removeLiquidityComponent}
+        ];
+        const req: SubmitTransactionRequest = {
+            account_id: account.account_id,
+            fee_instructions,
+            instructions: instructions as object[],
+            inputs: [],
+            input_refs: [],
+            required_substates,
+            is_dry_run: false,
+            min_epoch: null,
+            max_epoch: null
+        };
+
+        const resp = await provider.submitTransaction(req);
+
+        let result = await wallet.waitForTransactionResult(provider, resp.transaction_id);
+
+        console.log(result);
+    }
+
     const handleSwap = async () => {
         if (provider === null) {
             throw new Error('Provider is not initialized');
@@ -541,6 +627,18 @@ function Home() {
         setAddLiquidityResourceB_amount(event.target.value);
     };
 
+    const handleRemoveLiquidityComponent = async (event) => {
+        setRemoveLiquidityComponent(event.target.value);
+    };
+
+    const handleRemoveLiquidityResource = async (event) => {
+        setRemoveLiquidityResource(event.target.value);
+    };
+
+    const handleRemoveLiquidityAmount = async (event) => {
+        setRemoveLiquidityAmount(event.target.value);
+    };
+
     const handleSwapComponent = async (event) => {
         setSwapComponent(event.target.value);
     };
@@ -645,6 +743,31 @@ function Home() {
                 </Stack>
             </Stack>
             <Button onClick={async () => { await handleAddLiquidity(); }}>Add liquidity</Button>
+        </Box>
+        <Box sx={{ padding: 5, borderRadius: 4 }}>
+            <Stack direction="column" justifyContent="space-between" spacing={2}>
+                <TextField sx={{ mt: 1, width: '100%' }} id="removeLiquidityComponent" placeholder="Pool component address"
+                        onChange={handleRemoveLiquidityComponent}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+                <Stack direction="row" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '70%' }} id="removeLiquidityResource" placeholder="Resource address"
+                        onChange={handleRemoveLiquidityResource}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                    <TextField sx={{ mt: 1, width: '30%' }} id="removeLiquidityAmount" placeholder="0"
+                        onChange={handleRemoveLiquidityAmount}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                </Stack>
+            </Stack>
+            <Button onClick={async () => { await handleRemoveLiquidity(); }}>Remove liquidity</Button>
         </Box>
         <Box sx={{ padding: 5, borderRadius: 4 }}>
             <Stack direction="column" justifyContent="space-between" spacing={2}>
