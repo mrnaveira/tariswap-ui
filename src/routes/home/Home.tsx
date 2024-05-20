@@ -24,7 +24,7 @@ import "./Home.css";
 import {StyledPaper} from "../../components/StyledComponents";
 import Grid from "@mui/material/Grid";
 import SecondaryHeading from "../../components/SecondaryHeading";
-import {FinalizeResult, TemplateDef} from "@tariproject/wallet_jrpc_client";
+import {FinalizeResult, FunctionDef, TemplateDef} from "@tariproject/wallet_jrpc_client";
 import {useState, useEffect} from "react";
 import SettingsForm, {Settings} from "./SettingsForm.tsx";
 import CallTemplateForm from "../../components/CallTemplateForm.tsx";
@@ -37,6 +37,8 @@ import useSettings from "../../store/settings.ts";
 import useTariProvider from "../../store/provider.ts";
 
 function Home() {
+    let pool_index_template: string = import.meta.env.VITE_POOL_INDEX_TEMPLATE;
+
     const {settings, setSettings} = useSettings();
     const {provider} = useTariProvider();
 
@@ -61,6 +63,44 @@ function Home() {
     const onSaveSettings = (settings: Settings) => {
         localStorage.setItem("settings", JSON.stringify(settings));
         setSettings(settings);
+    }
+
+    const handleCreateIndexComponent = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+
+        const func: FunctionDef = {
+            name: "new",
+            arguments: [
+                {
+                    name: "pool_template",
+                    arg_type: { Other: {name: "TemplateAddress"}},
+                },
+                {
+                    name: "market_fee",
+                    arg_type: "U16"
+                }
+            ],
+            output: { Other: {name: "Component"}},
+            is_mut: false,
+        };
+
+        const args = {
+            pool_template: pool_index_template,
+            market_fee: 10,
+        }
+
+        const result = await wallet.buildInstructionsAndSubmit(
+            provider,
+            settings,
+            null,
+            null,
+            func,
+            args,
+        );
+        
+        console.log({ result });
     }
 
     useEffect(() => {
@@ -216,6 +256,7 @@ function Home() {
                 {form}
             </Grid>
         ))}
+        <Button onClick={async () => { await handleCreateIndexComponent(); }}>Create index component</Button>
     </HomeLayout>;
 }
 
