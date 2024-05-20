@@ -30,17 +30,29 @@ import SettingsForm, {Settings} from "./SettingsForm.tsx";
 import CallTemplateForm from "../../components/CallTemplateForm.tsx";
 import {Error} from "@mui/icons-material";
 import * as wallet from "../../wallet.ts";
-import {Alert, CircularProgress} from "@mui/material";
+import {Alert, Box, CircularProgress, Divider, IconButton, Stack, TextField, Typography} from "@mui/material";
 import * as React from "react";
 import Button from "@mui/material/Button";
 import useSettings from "../../store/settings.ts";
 import useTariProvider from "../../store/provider.ts";
 
 function Home() {
-    let pool_index_template: string = import.meta.env.VITE_POOL_INDEX_TEMPLATE;
+    const FAUCET_SUPPLY: number = 1_000_000;
+    const faucet_template: string = import.meta.env.VITE_FAUCET_TEMPLATE;
+    const pool_index_template: string = import.meta.env.VITE_POOL_INDEX_TEMPLATE;
+    const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
+
+    const {provider} = useTariProvider();
+
+    const [newTokenName, setNewTokenName] = useState<string | null>(null);
+    const [faucetComponent, setFaucetComponent] = useState<string | null>(null);
+
+    const [tokenA, setTokenA] = useState<string | null>(null);
+    const [tokenB, setTokenB] = useState<string | null>(null);
+
 
     const {settings, setSettings} = useSettings();
-    const {provider} = useTariProvider();
+    
 
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -96,6 +108,129 @@ function Home() {
             settings,
             null,
             null,
+            func,
+            args,
+        );
+        
+        console.log({ result });
+    }
+
+    const handleCreateToken = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+
+        const settings: Settings = {
+            template: faucet_template
+        };
+
+        const func: FunctionDef = {
+            name: "mint_with_symbol",
+            arguments: [
+                {
+                    name: "initial_supply",
+                    arg_type: { Other: {name: "Amount"}},
+                },
+                {
+                    name: "symbol",
+                    arg_type: "String",
+                },
+            ],
+            output: { Other: {name: "Component"}},
+            is_mut: false,
+        };
+
+        const args = {
+            initial_supply: `Amount(${FAUCET_SUPPLY})`,
+            symbol: newTokenName,
+        }
+
+        const result = await wallet.buildInstructionsAndSubmit(
+            provider,
+            settings,
+            null,
+            null,
+            func,
+            args,
+        );
+        
+        console.log({ result });
+    }
+
+    const handleGetTokens = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+
+        const settings: Settings = {
+            template: faucetComponent
+        };
+
+        const func: FunctionDef = {
+            name: "take_free_coins",
+            arguments: [
+                {
+                    name: "self",
+                    arg_type: { Other: {name: "&mut self"}},
+                },
+            ],
+            output: { Other: {name: "Bucket"}},
+            is_mut: false,
+        };
+
+        const args = {};
+
+        const result = await wallet.buildInstructionsAndSubmit(
+            provider,
+            settings,
+            null,
+            faucetComponent,
+            func,
+            args,
+        );
+        
+        console.log({ result });
+    }
+
+    const handleCreatePool = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+
+        const settings: Settings = {
+            template: pool_index_template
+        };
+
+        const func: FunctionDef = {
+            name: "create_pool",
+            arguments: [
+                {
+                    name: "self",
+                    arg_type: { Other: {name: "&mut self"}},
+                },
+                {
+                    name: "a_addr",
+                    arg_type: { Other: {name: "ResourceAddress"}},
+                },
+                {
+                    name: "b_addr",
+                    arg_type: { Other: {name: "ResourceAddress"}},
+                },
+            ],
+            output: { Other: {name: "Component"}},
+            is_mut: false,
+        };
+
+        const args = {
+            a_addr: tokenA,
+            b_addr: tokenB,
+        }
+
+        const result = await wallet.buildInstructionsAndSubmit(
+            provider,
+            settings,
+            null,
+            pool_index_component,
             func,
             args,
         );
@@ -174,89 +309,68 @@ function Home() {
         </HomeLayout>;
     }
 
+    const handleNewTokenName = async (event) => {
+        setNewTokenName(event.target.value);
+    };
+    
+    const handleTokenA = async (event) => {
+        setTokenA(event.target.value);
+    };
+    const handleTokenB = async (event) => {
+        setTokenB(event.target.value);
+    };
 
-    console.log(templateDefinition);
-
-    const forms = templateDefinition?.V1.functions.map((func, i) => {
-        return (
-            <>
-                <CallTemplateForm
-                    key={`calltemplate${i}`}
-                    func={func}
-                    badges={badges}
-                    selectedBadge={selectedBadge}
-                    onBadgeChange={setSelectedBadge}
-                    components={components}
-                    selectedComponent={selectedComponent}
-                    onComponentChange={setSelectedComponent}
-                    onCall={values => {
-                        setLastResult({index: i, result: null});
-                        wallet.buildInstructionsAndSubmit(
-                            provider,
-                            settings,
-                            selectedBadge,
-                            selectedComponent,
-                            func,
-                            values
-                        )
-                            .then(resp => {
-                                setLastResult({index: i, result: resp.result as FinalizeResult});
-                            })
-                            .catch(e => {
-                                setLastResult(null);
-                                setError(e.message);
-                            });
-                    }}
-                />
-                {lastResult?.result && lastResult.index === i ? (
-                    <Grid key={`grid${i}`} item xs={12} md={12} lg={12}>
-                        {(lastResult as any).result.result.Accept ? (
-                            <Alert severity="success">
-                                Accept:
-                                <pre>{JSON.stringify((lastResult as any).result.result.Accept)}</pre>
-                                {lastResult.result.execution_results
-                                    .filter(r => r.indexed.value !== "Null")
-                                    .map((r, i) => (
-                                        <p key={`return${i}`}>{JSON.stringify(r.indexed.value)}</p>
-                                    ))}
-                            </Alert>
-                        ) : (lastResult as any).result.result.AcceptFeeRejectRest ? (
-                            <Alert severity="error">
-                                AcceptFeeRejectRest: Error calling function:{" "}
-                                {JSON.stringify(
-                                    (lastResult as any).result.result.AcceptFeeRejectRest[1]
-                                )}
-                            </Alert>
-                        ) : (
-                            <Alert severity="error">
-                                Error calling function:{" "}
-                                {JSON.stringify((lastResult as any).result.result.Reject)}
-                            </Alert>
-                        )}
-
-                        {lastResult.result.logs.map((log, j) => (
-                            <p key={`logs${j}`}>
-                                {log.level} {log.message}
-                            </p>
-                        ))}
-                    </Grid>
-                ) : (
-                    lastResult?.index === i && <CircularProgress/>
-                )}
-            </>
-        );
-    });
+    const handleFaucetComponent = async (event) => {
+        setFaucetComponent(event.target.value);
+    };
 
     return <HomeLayout error={error} settings={settings} onCreateFreeTestCoins={async () => {
         await wallet.createFreeTestCoins(provider)
     }} setSettings={onSaveSettings}>
         {isLoading ? <CircularProgress/> : null}
-        {forms?.map((form, i) => (
-            <Grid key={`form${i}`} item xs={12} md={12} lg={12}>
-                {form}
-            </Grid>
-        ))}
         <Button onClick={async () => { await handleCreateIndexComponent(); }}>Create index component</Button>
+        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
+        <Box sx={{ padding: 5, borderRadius: 4 }}>
+            <Stack direction="column" justifyContent="space-between" spacing={2}>
+                <TextField sx={{ mt: 1, width: '100%' }} id="newTokenName" placeholder="New token name"
+                        onChange={handleNewTokenName}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+            </Stack>
+            <Button onClick={async () => { await handleCreateToken(); }}>Create token</Button>
+        </Box>
+        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
+        <Box sx={{ padding: 5, borderRadius: 4 }}>
+            <Stack direction="column" justifyContent="space-between" spacing={2}>
+                <TextField sx={{ mt: 1, width: '100%' }} id="getTokens" placeholder="Faucet component address"
+                        onChange={handleFaucetComponent}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+            </Stack>
+            <Button onClick={async () => { await handleGetTokens(); }}>Get tokens</Button>
+        </Box>
+        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
+        <Box sx={{ padding: 5, borderRadius: 4 }}>
+            <Stack direction="column" justifyContent="space-between" spacing={2}>
+                <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token A resource address"
+                        onChange={handleTokenA}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+                <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token B resource address"
+                        onChange={handleTokenB}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+            </Stack>
+            <Button onClick={async () => { await handleCreatePool(); }}>Create pool</Button>
+        </Box>
     </HomeLayout>;
 }
 

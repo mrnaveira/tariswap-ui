@@ -179,7 +179,7 @@ export async function createTransactionRequest(
                 CallMethod: {
                     component_address: account.address,
                     method: "deposit",
-                    args: [`Workspace(${bucketId})`],
+                    args: [{ Workspace: [bucketId] }],
                 }
             }
         ];
