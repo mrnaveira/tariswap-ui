@@ -35,6 +35,7 @@ import Button from "@mui/material/Button";
 import useSettings from "../../store/settings.ts";
 import useTariProvider from "../../store/provider.ts";
 import * as cbor from "../../cbor.ts";
+import { SubmitTransactionRequest } from "@tariproject/tarijs";
 
 function Home() {
     const FAUCET_SUPPLY: number = 1_000_000;
@@ -51,6 +52,12 @@ function Home() {
     const [tokenA, setTokenA] = useState<string | null>(null);
     const [tokenB, setTokenB] = useState<string | null>(null);
 
+
+    const [addLiquidityComponent, setAddLiquidityComponent] = useState<string | null>(null);
+    const [addLiquidityResourceA, setAddLiquidityResourceA] = useState<string | null>(null);
+    const [addLiquidityResourceA_amount, setAddLiquidityResourceA_amount] = useState<number | null>(null);
+    const [addLiquidityResourceB, setAddLiquidityResourceB] = useState<string | null>(null);
+    const [addLiquidityResourceB_amount, setAddLiquidityResourceB_amount] = useState<number | null>(null);
 
     const {settings, setSettings} = useSettings();
     
@@ -263,6 +270,94 @@ function Home() {
         console.log(pool_data);
     }
 
+    const handleAddLiquidity = async () => {
+        if (provider === null) {
+            throw new Error('Provider is not initialized');
+        }
+    
+        console.log({addLiquidityComponent, addLiquidityResourceA, addLiquidityResourceA_amount, addLiquidityResourceB, addLiquidityResourceB_amount});
+
+        // TODO: wrap into an utility function inside the "wallet.ts" file
+        const fee = 2000;
+        const account = await provider.getAccount();
+        const fee_instructions = [
+            {
+                CallMethod: {
+                    component_address: account.address,
+                    method: "pay_fee",
+                    args: [`Amount(${fee})`]
+                }
+            }
+        ];
+        const instructions = [
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "withdraw",
+                    "args": [addLiquidityResourceA, addLiquidityResourceA_amount.toString()]
+                }
+            },
+            {
+                "PutLastInstructionOutputOnWorkspace": {
+                    "key": [0]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "withdraw",
+                    "args": [addLiquidityResourceB, addLiquidityResourceB_amount.toString()]
+                }
+            },
+            {
+                "PutLastInstructionOutputOnWorkspace": {
+                    "key": [1]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": addLiquidityComponent,
+                    "method": "add_liquidity",
+                    "args": [
+                        { "Workspace": [0] }, { "Workspace": [1] }]
+                }
+            },
+            {
+                "PutLastInstructionOutputOnWorkspace": {
+                    "key": [2]
+                }
+            },
+            {
+                "CallMethod": {
+                    "component_address": account.address,
+                    "method": "deposit",
+                    "args": [{ "Workspace": [2] }]
+                }
+            }
+        ];
+        const required_substates = [
+            {substate_id: account.address},
+            {substate_id: addLiquidityComponent}
+        ];
+        const req: SubmitTransactionRequest = {
+            account_id: account.account_id,
+            fee_instructions,
+            instructions: instructions as object[],
+            inputs: [],
+            input_refs: [],
+            required_substates,
+            is_dry_run: false,
+            min_epoch: null,
+            max_epoch: null
+        };
+
+        const resp = await provider.submitTransaction(req);
+
+        let result = await wallet.waitForTransactionResult(provider, resp.transaction_id);
+
+        console.log(result);
+    }
+
     useEffect(() => {
         if (!provider) {
             return;
@@ -349,6 +444,26 @@ function Home() {
         setFaucetComponent(event.target.value);
     };
 
+    const handleAddLiquidityComponent = async (event) => {
+        setAddLiquidityComponent(event.target.value);
+    };
+
+    const handleAddLiquidityResourceA = async (event) => {
+        setAddLiquidityResourceA(event.target.value);
+    };
+
+    const handleAddLiquidityResourceA_amount = async (event) => {
+        setAddLiquidityResourceA_amount(event.target.value);
+    };
+
+    const handleAddLiquidityResourceB = async (event) => {
+        setAddLiquidityResourceB(event.target.value);
+    };
+
+    const handleAddLiquidityResourceB_amount = async (event) => {
+        setAddLiquidityResourceB_amount(event.target.value);
+    };
+
     return <HomeLayout error={error} settings={settings} onCreateFreeTestCoins={async () => {
         await wallet.createFreeTestCoins(provider)
     }} setSettings={onSaveSettings}>
@@ -398,6 +513,46 @@ function Home() {
         </Box>
         <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
         <Button onClick={async () => { await handleListPools(); }}>List pools</Button>
+        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
+        <Box sx={{ padding: 5, borderRadius: 4 }}>
+            <Stack direction="column" justifyContent="space-between" spacing={2}>
+                <TextField sx={{ mt: 1, width: '100%' }} id="addLiquidityComponent" placeholder="Pool component address"
+                        onChange={handleAddLiquidityComponent}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                </TextField>
+                <Stack direction="row" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceA" placeholder="Resource address"
+                        onChange={handleAddLiquidityResourceA}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                    <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceA_amount" placeholder="0"
+                        onChange={handleAddLiquidityResourceA_amount}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceB" placeholder="Resource address"
+                        onChange={handleAddLiquidityResourceB}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                    <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceB_amount" placeholder="0"
+                        onChange={handleAddLiquidityResourceB_amount}
+                        InputProps={{
+                            sx: { borderRadius: 2 },
+                        }}>
+                    </TextField>
+                </Stack>
+            </Stack>
+            <Button onClick={async () => { await handleAddLiquidity(); }}>Add liquidity</Button>
+        </Box>
     </HomeLayout>;
 }
 

@@ -79,7 +79,7 @@ export async function buildInstructionsAndSubmit(
     return result;
 }
 
-async function waitForTransactionResult(provider: TariProvider, transactionId: string) {
+export async function waitForTransactionResult(provider: TariProvider, transactionId: string) {
     while (true) {
         const resp = await provider.getTransactionResult(transactionId);
         const FINALIZED_STATUSES = [
