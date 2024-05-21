@@ -26,6 +26,7 @@ import {Box, MenuItem, Stack} from "@mui/material";
 import useTariProvider from "../../store/provider.ts";
 import Utilities from "../../sections/Utilities.tsx";
 import Swap from "../../sections/Swap.tsx";
+import Pools from "../../sections/Pools.tsx";
 
 function Home() {
     const {provider} = useTariProvider();
@@ -55,7 +56,7 @@ function Home() {
         )}
         {tab === 1 && (
           <Box >
-            Pools
+            <Pools/>
           </Box>
         )}
         {tab === 2 && (
