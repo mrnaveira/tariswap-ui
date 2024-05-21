@@ -47,6 +47,8 @@ function Swap() {
     const [inputTokenDialogOpen, setInputTokenDialogOpen] = useState(false);
     const [outputTokenDialogOpen, setOutputTokenDialogOpen] = useState(false);
 
+    const [inputAmount, setInputAmount] = useState<string | null>(null);
+
 
     const [swapComponent, setSwapComponent] = useState<string | null>(null);
     const [swapResource, setSwapResource] = useState<string | null>(null);
@@ -97,6 +99,7 @@ function Swap() {
     const handleInputTokenSelected = (token: string | null) => {
         setSelectedInputToken(token);
         setInputTokenDialogOpen(false);
+        setInputAmount("");
 
         // when the user selects a token, the other token must only correspond to existing pool pairs
         setOutputTokens(getCorrespondingPoolTokens(token));
@@ -110,37 +113,54 @@ function Swap() {
         setInputTokens(getCorrespondingPoolTokens(token));
     };
 
+    const handleInputAmount = async (event) => {
+        setInputAmount(event.target.value);
+    };
+
     const handleSwap = async () => {
+        let inputAmountNumber = parseInt(inputAmount);
+        if (!inputAmountNumber || inputAmountNumber <= 0) {
+            console.error("Invalid amount");
+            return;
+        }
+
+        const pool = pools.find(pool =>
+            (pool.resourceA === selectedInputToken && pool.resourceB === selectedOutputToken) ||
+            (pool.resourceA === selectedOutputToken && pool.resourceB === selectedInputToken)
+        );
+
+        if (!pool) {
+            console.error("Pool not found matching the swap operation");
+            return;
+        }
+
+        const { poolComponent } = pool;
+
+        console.log({
+            poolComponent,
+            selectedInputToken,
+            inputAmountNumber,
+            selectedOutputToken
+        });
+        
         const result = await tariswap.swap(
             provider,
-            swapComponent,
-            swapResource,
-            swapResource_amount,
-            swapOutputResource
+            poolComponent,
+            selectedInputToken,
+            inputAmountNumber,
+            selectedOutputToken
         );
         console.log(result);
     }
-
-    const handleSwapComponent = async (event: any) => {
-        setSwapComponent(event.target.value);
-    };
-
-    const handleSwapResource = async (event: any) => {
-        setSwapResource(event.target.value);
-    };
-
-    const handleSwapResource_amount = async (event: any) => {
-        setSwapResource_amount(event.target.value);
-    };
-
-    const handleSwapOutputResource = async (event: any) => {
-        setSwapOutputResource(event.target.value);
-    };
 
     const truncateResource = (resource: string, size: number) => {
         const address = resource.replace("resource_", "");
         return truncateText(address, size);
     }
+
+    const canSwap = () => {
+        return selectedInputToken && selectedOutputToken;
+    } 
 
     return <Box>
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
@@ -154,6 +174,8 @@ function Swap() {
                             {selectedInputToken ? (truncateResource(selectedInputToken, 10)) : 'Select token'}
                     </Button>
                     <TextField sx={{ width: '60%' }} placeholder="0"
+                        value={inputAmount}
+                        onChange={handleInputAmount}
                         InputProps={{
                             sx: { borderRadius: 2 },
                         }}
@@ -185,8 +207,11 @@ function Swap() {
                         }} />
                 </Stack>
 
-                <Button variant="contained" disabled sx={{ mt: 6, py: 1
-                    , width: '50%', borderRadius: 2, fontSize: 20, textTransform: 'capitalize' }}>Swap</Button>
+                <Button variant="contained" disabled={!canSwap()}
+                    onClick={async () => {handleSwap()}}
+                    sx={{ mt: 6, py: 1, width: '50%', borderRadius: 2, fontSize: 20, textTransform: 'capitalize' }}>
+                        Swap
+                </Button>
             </Box>
         </Paper>
         <TokenSelectDialog
@@ -201,38 +226,6 @@ function Swap() {
             onClose={() => {setOutputTokenDialogOpen(false)}}
             tokens={outputTokens}
         />
-
-        <Box sx={{ padding: 5, borderRadius: 4 }}>
-            <Stack direction="column" justifyContent="space-between" spacing={2}>
-                <TextField sx={{ mt: 1, width: '100%' }} id="swapComponent" placeholder="Pool component address"
-                    onChange={handleSwapComponent}
-                    InputProps={{
-                        sx: { borderRadius: 2 },
-                    }}>
-                </TextField>
-                <Stack direction="row" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '70%' }} id="swapResource" placeholder="Input resource address"
-                        onChange={handleSwapResource}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                    <TextField sx={{ mt: 1, width: '30%' }} id="swapResource_amount" placeholder="0"
-                        onChange={handleSwapResource_amount}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                </Stack>
-                <TextField sx={{ mt: 1, width: '100%' }} id="swapOutputResource" placeholder="Output resource address"
-                    onChange={handleSwapOutputResource}
-                    InputProps={{
-                        sx: { borderRadius: 2 },
-                    }}>
-                </TextField>
-            </Stack>
-            <Button onClick={async () => { await handleSwap(); }}>Swap</Button>
-        </Box>
     </Box>;
 }
 
