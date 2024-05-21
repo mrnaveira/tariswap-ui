@@ -6,11 +6,12 @@ import Typography from "@mui/material/Typography";
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from "@mui/material/IconButton";
 import { List, ListItemButton } from "@mui/material";
+import { truncateText } from "../utils/text";
 
 export interface TokenSelectDialogProps {
     open: boolean;
     tokens: string[],
-    onSelect: (token: string | null) => void;
+    onSelect: (token: string) => void;
     onClose: () => void;
 }
 
@@ -40,7 +41,7 @@ export function TokenSelectDialog(props: TokenSelectDialogProps) {
                     {
                         tokens.map(token => (
                             <ListItemButton onClick={(_) => handleTokenSelect(token)}>
-                                {token}
+                                 <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>{truncateText(token, 40)}</Typography> 
                             </ListItemButton>
                         ))
                     }
