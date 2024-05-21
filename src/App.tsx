@@ -26,34 +26,16 @@ import { Routes, Route } from "react-router-dom";
 import ErrorPage from "./routes/ErrorPage";
 import Layout from "./theme/LayoutMain";
 import Home from "./routes/home";
-import Substates from "./routes/substates";
 
-export const breadcrumbRoutes = [
-  {
-    label: "Home",
-    path: "/",
-    dynamic: false
-  },
-  {
-    label: "Substates",
-    path: "/substates",
-    dynamic: false,
-  },
-  {
-    label: "Error",
-    path: "*",
-    dynamic: false
-  }
-];
 export default function App() {
   return (
     <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-      </Routes>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="*" element={<ErrorPage />} />
+          </Route>
+        </Routes>
     </>
   );
 }
