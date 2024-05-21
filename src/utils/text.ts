@@ -12,6 +12,11 @@ export const truncateText = (text: string, length: number) => {
     return text.substring(0, leftChars) + '...' + text.substring(text.length - rightChars);
 }
 
+export const truncateResource = (resource: string, size: number) => {
+    const address = resource.replace("resource_", "");
+    return truncateText(address, size);
+}
+
 export const copyToCliboard = async (text: string) => {
     if (text) {
         navigator.clipboard.writeText(text);

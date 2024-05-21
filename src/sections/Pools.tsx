@@ -21,15 +21,13 @@
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import { useEffect, useState } from "react";
-import { Box, IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, IconButton, Paper, Stack, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import useTariProvider from "../store/provider.ts";
 import * as tariswap from "../tariswap.ts";
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { TokenSelectDialog } from "../components/TokenSelectDialog.tsx";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { copyToCliboard, truncateText } from "../utils/text.ts";
+import { copyToCliboard, truncateResource } from "../utils/text.ts";
+import { AddLiquidityDialog } from "../components/AddLiquidityDialog.tsx";
 
 function Pools() {
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
@@ -37,6 +35,8 @@ function Pools() {
     const { provider } = useTariProvider();
 
     const [pools, setPools] = useState<object[]>([]);
+    const [selectedPool, setSelectedPool] = useState<object | null>(null);
+    const [addLiquidityDialogOpen, setAddLiquidityDialogOpen] = useState(false);
 
     useEffect(() => {
         if (!provider) {
@@ -53,11 +53,10 @@ function Pools() {
             });
     }, []);
 
-    const truncateResource = (resource: string, size: number) => {
-        const address = resource.replace("resource_", "");
-        return truncateText(address, size);
-    }
-
+    const handleAddLiquidity = async (pool: object) => {
+        setSelectedPool(pool);
+        setAddLiquidityDialogOpen(true);
+    };
 
     return <Box>
         {
@@ -82,6 +81,7 @@ function Pools() {
                         </Stack>
                         <Stack direction='column' sx={{ width: '40%' }} spacing={1}>
                             <Button variant="contained"
+                                onClick={() => {handleAddLiquidity(pool)}}
                                 sx={{ borderRadius: 1, fontSize: 16, textTransform: 'none' }}>
                                 Add Liquidity
                             </Button>
@@ -99,6 +99,12 @@ function Pools() {
             sx={{ borderRadius: 1, fontSize: 16, textTransform: 'none' }}>
             Create pool
         </Button>
+
+        <AddLiquidityDialog
+            open={addLiquidityDialogOpen}
+            onClose={() => {setAddLiquidityDialogOpen(false)}}
+            pool={selectedPool}
+        />
     </Box>;
 }
 

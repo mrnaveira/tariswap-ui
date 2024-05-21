@@ -28,7 +28,7 @@ import * as tariswap from "../tariswap.ts";
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { TokenSelectDialog } from "../components/TokenSelectDialog.tsx";
-import { truncateText } from "../utils/text.ts";
+import { truncateResource } from "../utils/text.ts";
 
 function Swap() {
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
@@ -48,12 +48,6 @@ function Swap() {
     const [outputTokenDialogOpen, setOutputTokenDialogOpen] = useState(false);
 
     const [inputAmount, setInputAmount] = useState<string | null>(null);
-
-
-    const [swapComponent, setSwapComponent] = useState<string | null>(null);
-    const [swapResource, setSwapResource] = useState<string | null>(null);
-    const [swapResource_amount, setSwapResource_amount] = useState<number | null>(null);
-    const [swapOutputResource, setSwapOutputResource] = useState<string | null>(null);
 
     useEffect(() => {
         if (!provider) {
@@ -151,11 +145,6 @@ function Swap() {
             selectedOutputToken
         );
         console.log(result);
-    }
-
-    const truncateResource = (resource: string, size: number) => {
-        const address = resource.replace("resource_", "");
-        return truncateText(address, size);
     }
 
     const canSwap = () => {
