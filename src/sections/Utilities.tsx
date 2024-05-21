@@ -20,8 +20,8 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import {useState} from "react";
-import {Box, Divider, Stack, TextField} from "@mui/material";
+import { useState } from "react";
+import { Box, Divider, Paper, Stack, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import useTariProvider from "../store/provider.ts";
 import * as tariswap from "../tariswap.ts";
@@ -34,7 +34,7 @@ function Utilities() {
     const pool_template: string = import.meta.env.VITE_POOL_TEMPLATE;
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
 
-    const {provider} = useTariProvider();
+    const { provider } = useTariProvider();
 
     const [newTokenName, setNewTokenName] = useState<string | null>(null);
     const [faucetComponent, setFaucetComponent] = useState<string | null>(null);
@@ -51,12 +51,6 @@ function Utilities() {
     const [removeLiquidityComponent, setRemoveLiquidityComponent] = useState<string | null>(null);
     const [removeLiquidityResource, setRemoveLiquidityResource] = useState<string | null>(null);
     const [removeLiquidityAmount, setRemoveLiquidityAmount] = useState<number | null>(null);
-
-    const [swapComponent, setSwapComponent] = useState<string | null>(null);
-    const [swapResource, setSwapResource] = useState<string | null>(null);
-    const [swapResource_amount, setSwapResource_amount] = useState<number | null>(null);
-    const [swapOutputResource, setSwapOutputResource] = useState<string | null>(null);
-
 
     const handleCreateToken = async () => {
         const result = await faucet.createFaucet(provider, faucet_template, FAUCET_SUPPLY, newTokenName);
@@ -91,7 +85,7 @@ function Utilities() {
             addLiquidityComponent,
             addLiquidityResourceA,
             addLiquidityResourceA_amount,
-            addLiquidityResourceB, 
+            addLiquidityResourceB,
             addLiquidityResourceB_amount
         );
         console.log(result);
@@ -121,7 +115,7 @@ function Utilities() {
     const handleNewTokenName = async (event: any) => {
         setNewTokenName(event.target.value);
     };
-    
+
     const handleTokenA = async (event: any) => {
         setTokenA(event.target.value);
     };
@@ -165,164 +159,129 @@ function Utilities() {
         setRemoveLiquidityAmount(event.target.value);
     };
 
-    const handleSwapComponent = async (event: any) => {
-        setSwapComponent(event.target.value);
-    };
-
-    const handleSwapResource = async (event: any) => {
-        setSwapResource(event.target.value);
-    };
-
-    const handleSwapResource_amount = async (event: any) => {
-        setSwapResource_amount(event.target.value);
-    };
-
-    const handleSwapOutputResource = async (event: any) => {
-        setSwapOutputResource(event.target.value);
-    };
-
     return <Box>
-        <Button onClick={async () => { await handleCreateIndexComponent(); }}>Create index component</Button>
-        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
-        <Box sx={{ padding: 5, borderRadius: 4 }}>
-            <Stack direction="column" justifyContent="space-between" spacing={2}>
-                <TextField sx={{ mt: 1, width: '100%' }} id="newTokenName" placeholder="New token name"
+        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            <Box sx={{ padding: 1, borderRadius: 4 }}>
+                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '100%' }} id="newTokenName" placeholder="New token name"
                         onChange={handleNewTokenName}
                         InputProps={{
                             sx: { borderRadius: 2 },
                         }}>
-                </TextField>
-            </Stack>
-            <Button onClick={async () => { await handleCreateToken(); }}>Create token</Button>
-        </Box>
-        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
-        <Box sx={{ padding: 5, borderRadius: 4 }}>
-            <Stack direction="column" justifyContent="space-between" spacing={2}>
-                <TextField sx={{ mt: 1, width: '100%' }} id="getTokens" placeholder="Faucet component address"
+                    </TextField>
+                </Stack>
+                <Button variant='contained' onClick={async () => { await handleCreateToken(); }}>Create token</Button>
+            </Box>
+        </Paper>
+        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            <Box sx={{ padding: 5, borderRadius: 4 }}>
+                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '100%' }} id="getTokens" placeholder="Faucet component address"
                         onChange={handleFaucetComponent}
                         InputProps={{
                             sx: { borderRadius: 2 },
                         }}>
-                </TextField>
-            </Stack>
-            <Button onClick={async () => { await handleGetTokens(); }}>Get tokens</Button>
-        </Box>
-        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
-        <Box sx={{ padding: 5, borderRadius: 4 }}>
-            <Stack direction="column" justifyContent="space-between" spacing={2}>
-                <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token A resource address"
+                    </TextField>
+                </Stack>
+                <Button variant='contained' onClick={async () => { await handleGetTokens(); }}>Get tokens</Button>
+            </Box>
+        </Paper>
+        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            <Button variant='contained' onClick={async () => { await handleCreateIndexComponent(); }}>Create index component</Button>
+        </Paper>
+        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            <Box sx={{ padding: 5, borderRadius: 4 }}>
+                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token A resource address"
                         onChange={handleTokenA}
                         InputProps={{
                             sx: { borderRadius: 2 },
                         }}>
-                </TextField>
-                <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token B resource address"
+                    </TextField>
+                    <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token B resource address"
                         onChange={handleTokenB}
                         InputProps={{
                             sx: { borderRadius: 2 },
                         }}>
-                </TextField>
-            </Stack>
-            <Button onClick={async () => { await handleCreatePool(); }}>Create pool</Button>
-        </Box>
-        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
-        <Button onClick={async () => { await handleListPools(); }}>List pools</Button>
-        <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
-        <Box sx={{ padding: 5, borderRadius: 4 }}>
-            <Stack direction="column" justifyContent="space-between" spacing={2}>
-                <TextField sx={{ mt: 1, width: '100%' }} id="addLiquidityComponent" placeholder="Pool component address"
+                    </TextField>
+                </Stack>
+                <Button variant='contained' onClick={async () => { await handleCreatePool(); }}>Create pool</Button>
+            </Box>
+        </Paper>
+
+        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            <Button variant='contained' onClick={async () => { await handleListPools(); }}>List pools</Button>
+        </Paper>
+
+        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            <Box sx={{ padding: 5, borderRadius: 4 }}>
+                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '100%' }} id="addLiquidityComponent" placeholder="Pool component address"
                         onChange={handleAddLiquidityComponent}
                         InputProps={{
                             sx: { borderRadius: 2 },
                         }}>
-                </TextField>
-                <Stack direction="row" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceA" placeholder="Resource address"
-                        onChange={handleAddLiquidityResourceA}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
                     </TextField>
-                    <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceA_amount" placeholder="0"
-                        onChange={handleAddLiquidityResourceA_amount}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
+                    <Stack direction="row" justifyContent="space-between" spacing={2}>
+                        <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceA" placeholder="Resource address"
+                            onChange={handleAddLiquidityResourceA}
+                            InputProps={{
+                                sx: { borderRadius: 2 },
+                            }}>
+                        </TextField>
+                        <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceA_amount" placeholder="0"
+                            onChange={handleAddLiquidityResourceA_amount}
+                            InputProps={{
+                                sx: { borderRadius: 2 },
+                            }}>
+                        </TextField>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between" spacing={2}>
+                        <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceB" placeholder="Resource address"
+                            onChange={handleAddLiquidityResourceB}
+                            InputProps={{
+                                sx: { borderRadius: 2 },
+                            }}>
+                        </TextField>
+                        <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceB_amount" placeholder="0"
+                            onChange={handleAddLiquidityResourceB_amount}
+                            InputProps={{
+                                sx: { borderRadius: 2 },
+                            }}>
+                        </TextField>
+                    </Stack>
                 </Stack>
-                <Stack direction="row" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceB" placeholder="Resource address"
-                        onChange={handleAddLiquidityResourceB}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                    <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceB_amount" placeholder="0"
-                        onChange={handleAddLiquidityResourceB_amount}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                </Stack>
-            </Stack>
-            <Button onClick={async () => { await handleAddLiquidity(); }}>Add liquidity</Button>
-        </Box>
-        <Box sx={{ padding: 5, borderRadius: 4 }}>
-            <Stack direction="column" justifyContent="space-between" spacing={2}>
-                <TextField sx={{ mt: 1, width: '100%' }} id="removeLiquidityComponent" placeholder="Pool component address"
+                <Button variant='contained' onClick={async () => { await handleAddLiquidity(); }}>Add liquidity</Button>
+            </Box>
+        </Paper>
+
+        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            <Box sx={{ padding: 5, borderRadius: 4 }}>
+                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
+                    <TextField sx={{ mt: 1, width: '100%' }} id="removeLiquidityComponent" placeholder="Pool component address"
                         onChange={handleRemoveLiquidityComponent}
                         InputProps={{
                             sx: { borderRadius: 2 },
                         }}>
-                </TextField>
-                <Stack direction="row" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '70%' }} id="removeLiquidityResource" placeholder="Resource address"
-                        onChange={handleRemoveLiquidityResource}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
                     </TextField>
-                    <TextField sx={{ mt: 1, width: '30%' }} id="removeLiquidityAmount" placeholder="0"
-                        onChange={handleRemoveLiquidityAmount}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
+                    <Stack direction="row" justifyContent="space-between" spacing={2}>
+                        <TextField sx={{ mt: 1, width: '70%' }} id="removeLiquidityResource" placeholder="Resource address"
+                            onChange={handleRemoveLiquidityResource}
+                            InputProps={{
+                                sx: { borderRadius: 2 },
+                            }}>
+                        </TextField>
+                        <TextField sx={{ mt: 1, width: '30%' }} id="removeLiquidityAmount" placeholder="0"
+                            onChange={handleRemoveLiquidityAmount}
+                            InputProps={{
+                                sx: { borderRadius: 2 },
+                            }}>
+                        </TextField>
+                    </Stack>
                 </Stack>
-            </Stack>
-            <Button onClick={async () => { await handleRemoveLiquidity(); }}>Remove liquidity</Button>
-        </Box>
-        <Box sx={{ padding: 5, borderRadius: 4 }}>
-            <Stack direction="column" justifyContent="space-between" spacing={2}>
-                <TextField sx={{ mt: 1, width: '100%' }} id="swapComponent" placeholder="Pool component address"
-                        onChange={handleSwapComponent}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                </TextField>
-                <Stack direction="row" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '70%' }} id="swapResource" placeholder="Input resource address"
-                        onChange={handleSwapResource}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                    <TextField sx={{ mt: 1, width: '30%' }} id="swapResource_amount" placeholder="0"
-                        onChange={handleSwapResource_amount}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                </Stack>
-                <TextField sx={{ mt: 1, width: '100%' }} id="swapOutputResource" placeholder="Output resource address"
-                        onChange={handleSwapOutputResource}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                </TextField>
-            </Stack>
-            <Button onClick={async () => { await handleSwap(); }}>Swap</Button>
-        </Box>
+                <Button variant='contained' onClick={async () => { await handleRemoveLiquidity(); }}>Remove liquidity</Button>
+            </Box>
+        </Paper>
     </Box>;
 }
 
