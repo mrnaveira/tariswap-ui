@@ -11,15 +11,14 @@ import { truncateText } from "../utils/text";
 export interface TokenSelectDialogProps {
     open: boolean;
     tokens: string[],
-    onSelect: (token: string) => void;
+    onSelect: (token: string | null) => void;
     onClose: () => void;
 }
 
 export function TokenSelectDialog(props: TokenSelectDialogProps) {
     const { tokens, onSelect, onClose, open } = props;
 
-    const handleTokenSelect = async (token: string) => {
-        console.log({ token });
+    const handleTokenSelect = async (token: string | null) => {
         onSelect(token);
     };
 
@@ -38,6 +37,9 @@ export function TokenSelectDialog(props: TokenSelectDialogProps) {
                 </Stack>
                 <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
                 <List sx={{ width: '100%' }}>
+                    <ListItemButton onClick={(_) => handleTokenSelect(null)}>
+                        <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>Clear</Typography> 
+                    </ListItemButton>
                     {
                         tokens.map(token => (
                             <ListItemButton onClick={(_) => handleTokenSelect(token)}>

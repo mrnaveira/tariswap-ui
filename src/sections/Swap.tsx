@@ -40,6 +40,7 @@ function Swap() {
     const [selectedInputToken, setSelectedInputToken] = useState<string | null>(null);
     const [selectedOutputToken, setSelectedOutputToken] = useState<string | null>(null);
 
+    const [tokens, setTokens] = useState<string[]>([]);
     const [inputTokens, setInputTokens] = useState<string[]>([]);
     const [outputTokens, setOutputTokens] = useState<string[]>([]);
 
@@ -69,6 +70,7 @@ function Swap() {
                 });
                 // remove duplicates
                 tokens = [...new Set(tokens)];
+                setTokens(tokens);
                 setInputTokens(tokens);
                 setOutputTokens(tokens)
             })
@@ -77,14 +79,35 @@ function Swap() {
             });
     }, []);
 
-    const handleInputTokenSelected = (token: string) => {
+    const getCorrespondingPoolTokens = (token: string | null) => {
+        if (!token)
+            return tokens;
+
+        const correspondingTokens: string[] = [];
+        pools.forEach(pool => {
+            if (pool.resourceA === token) {
+                correspondingTokens.push(pool.resourceB);
+            } else if (pool.resourceB === token) {
+                correspondingTokens.push(pool.resourceA);
+            }
+        });
+        return correspondingTokens;
+    }
+
+    const handleInputTokenSelected = (token: string | null) => {
         setSelectedInputToken(token);
         setInputTokenDialogOpen(false);
+
+        // when the user selects a token, the other token must only correspond to existing pool pairs
+        setOutputTokens(getCorrespondingPoolTokens(token));
     };
 
-    const handleOutputTokenSelected = (token: string) => {
+    const handleOutputTokenSelected = (token: string | null) => {
         setSelectedOutputToken(token);
         setOutputTokenDialogOpen(false);
+
+        // when the user selects a token, the other token must only correspond to existing pool pairs
+        setInputTokens(getCorrespondingPoolTokens(token));
     };
 
     const handleSwap = async () => {
