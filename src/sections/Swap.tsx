@@ -27,6 +27,7 @@ import useTariProvider from "../store/provider.ts";
 import * as tariswap from "../tariswap.ts";
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { TokenSelectDialog } from "../components/TokenSelectDialog.tsx";
 
 function Swap() {
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
@@ -34,6 +35,9 @@ function Swap() {
     const { provider } = useTariProvider();
 
     const [pools, setPools] = useState<object[]>([]);
+    const [tokens, setTokens] = useState<string[]>([]);
+
+    const [selectTokenDialogOpen, setSelectTokenDialog] = useState(false);
 
     const [swapComponent, setSwapComponent] = useState<string | null>(null);
     const [swapResource, setSwapResource] = useState<string | null>(null);
@@ -49,11 +53,35 @@ function Swap() {
             .then(pools => {
                 setPools(pools);
                 console.log(pools);
+
+                let tokens: string[] = [];
+                pools.forEach((pool: object) => {
+                    tokens.push(pool.resourceA);
+                    tokens.push(pool.resourceB);
+                });
+                // remove duplicates
+                tokens = [...new Set(tokens)];
+                setTokens(tokens);
             })
             .catch(e => {
                 console.error(e);
             });
     }, []);
+
+    const handleInputTokenSelect = () => {
+        // TODO: set available tokens first
+        setSelectTokenDialog(true);
+    };
+
+    const handleSelectTokenDialogClose = () => {
+        setSelectTokenDialog(false);
+    };
+
+    const handleTokenSelected = (token: string) => {
+        setSelectTokenDialog(false);
+        console.log("token selected");
+        console.log({token});
+    };
 
     const handleSwap = async () => {
         const result = await tariswap.swap(
@@ -83,13 +111,13 @@ function Swap() {
     };
 
     return <Box>
-
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
             <Box sx={{ my: 2, mx: 1.5 }}>
                 <Stack direction="row" spacing={2}>
                     <Button
                         variant="outlined"
                         endIcon={<ArrowDropDownIcon/>}
+                        onClick={handleInputTokenSelect}
                         sx={{ width: '40%', borderRadius: 2, textTransform: 'none', fontSize: 16 }}>A</Button>
                     <TextField sx={{ width: '60%' }} placeholder="0"
                         InputProps={{
@@ -123,6 +151,12 @@ function Swap() {
                     , width: '50%', borderRadius: 2, fontSize: 20, textTransform: 'capitalize' }}>Swap</Button>
             </Box>
         </Paper>
+        <TokenSelectDialog
+            open={selectTokenDialogOpen}
+            onSelect={handleTokenSelected}
+            onClose={handleSelectTokenDialogClose}
+            tokens={tokens}
+        />
 
         <Box sx={{ padding: 5, borderRadius: 4 }}>
             <Stack direction="column" justifyContent="space-between" spacing={2}>
