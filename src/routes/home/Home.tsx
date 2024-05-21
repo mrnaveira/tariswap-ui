@@ -25,13 +25,18 @@ import {useState} from "react";
 import {Box, MenuItem, Stack} from "@mui/material";
 import useTariProvider from "../../store/provider.ts";
 import Utilities from "../../sections/Utilities.tsx";
+import Swap from "../../sections/Swap.tsx";
 
 function Home() {
     const {provider} = useTariProvider();
     const [tab, setTab] = useState(0);
 
+    // TODO: this is super hacky but I coun't find another way to set this property
+    document.body.style.background = "linear-gradient(rgba(184,212,255,1) 0%, rgba(255,255,255,1) 100%)";
+    document.body.style.backgroundAttachment = "fixed";
+
     if (!provider) {
-        return <Box>
+        return <Box sx={{ mt: 20 }}>
             <pre>Please connect your wallet</pre>
         </Box>;
     }
@@ -45,7 +50,7 @@ function Home() {
         </Stack>
         {tab === 0 && (
           <Box >
-            Swap
+            <Swap />
           </Box>
         )}
         {tab === 1 && (

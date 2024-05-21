@@ -20,15 +20,10 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./Utilities.css";
-import {FinalizeResult, TemplateDef} from "@tariproject/wallet_jrpc_client";
-import {useState, useEffect} from "react";
-import {Alert, Box, CircularProgress, Divider, IconButton, Stack, TextField, Typography} from "@mui/material";
-import * as React from "react";
+import {useState} from "react";
+import {Box, Divider, Stack, TextField} from "@mui/material";
 import Button from "@mui/material/Button";
-import useSettings from "../store/settings.ts";
 import useTariProvider from "../store/provider.ts";
-import * as wallet from "../wallet.ts";
 import * as tariswap from "../tariswap.ts";
 import * as faucet from "../faucet.ts";
 
@@ -47,7 +42,6 @@ function Utilities() {
     const [tokenA, setTokenA] = useState<string | null>(null);
     const [tokenB, setTokenB] = useState<string | null>(null);
 
-
     const [addLiquidityComponent, setAddLiquidityComponent] = useState<string | null>(null);
     const [addLiquidityResourceA, setAddLiquidityResourceA] = useState<string | null>(null);
     const [addLiquidityResourceA_amount, setAddLiquidityResourceA_amount] = useState<number | null>(null);
@@ -63,30 +57,6 @@ function Utilities() {
     const [swapResource_amount, setSwapResource_amount] = useState<number | null>(null);
     const [swapOutputResource, setSwapOutputResource] = useState<string | null>(null);
 
-    const {settings, setSettings} = useSettings();
-    
-
-    const [error, setError] = useState(null);
-    const [components, setComponents] = useState<string[]>([]);
-    const [selectedComponent, setSelectedComponent] = useState<string | null>(
-        null
-    );
-    const [
-        templateDefinition,
-        setTemplateDefinition
-    ] = useState<TemplateDef | null>(null);
-    const [badges, setBadges] = useState<string[]>([]);
-    const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
-    const [lastResult, setLastResult] = useState<{
-        index: number;
-        result: FinalizeResult | null;
-    } | null>(null);
-
-
-    const onSaveSettings = (settings: Settings) => {
-        localStorage.setItem("settings", JSON.stringify(settings));
-        setSettings(settings);
-    }
 
     const handleCreateToken = async () => {
         const result = await faucet.createFaucet(provider, faucet_template, FAUCET_SUPPLY, newTokenName);
