@@ -28,6 +28,7 @@ import * as tariswap from "../tariswap.ts";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { copyToCliboard, truncateResource } from "../utils/text.ts";
 import { AddLiquidityDialog } from "../components/AddLiquidityDialog.tsx";
+import { CreatePoolDialog } from "../components/CreatePoolDialog.tsx";
 
 function Pools() {
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
@@ -37,8 +38,9 @@ function Pools() {
     const [pools, setPools] = useState<object[]>([]);
     const [selectedPool, setSelectedPool] = useState<object | null>(null);
     const [addLiquidityDialogOpen, setAddLiquidityDialogOpen] = useState(false);
+    const [createPoolDialogOpen, setCreatePoolDialogOpen] = useState(false);
 
-    useEffect(() => {
+    const refreshPools = () => {
         if (!provider) {
             return;
         }
@@ -51,11 +53,24 @@ function Pools() {
             .catch(e => {
                 console.error(e);
             });
+    }
+
+    useEffect(() => {
+        refreshPools();
     }, []);
 
     const handleAddLiquidity = async (pool: object) => {
         setSelectedPool(pool);
         setAddLiquidityDialogOpen(true);
+    };
+
+    const handleCreatePoolOpen = async () => {
+        setCreatePoolDialogOpen(true);
+    };
+
+    const handleCreatePoolDialogClose = async () => {
+        setCreatePoolDialogOpen(false);
+        refreshPools();
     };
 
     return <Box>
@@ -96,14 +111,20 @@ function Pools() {
             ))
         }
         <Button variant="contained"
+            onClick={() => {handleCreatePoolOpen()}}
             sx={{ borderRadius: 1, fontSize: 16, textTransform: 'none' }}>
-            Create pool
+            Create New Pool
         </Button>
 
         <AddLiquidityDialog
             open={addLiquidityDialogOpen}
             onClose={() => {setAddLiquidityDialogOpen(false)}}
             pool={selectedPool}
+        />
+
+        <CreatePoolDialog
+            open={createPoolDialogOpen}
+            onClose={handleCreatePoolDialogClose}
         />
     </Box>;
 }

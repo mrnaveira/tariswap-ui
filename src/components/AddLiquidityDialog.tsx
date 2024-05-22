@@ -67,7 +67,7 @@ export function AddLiquidityDialog(props: AddLiquidityDialogProps) {
             pool.resourceB,
             amountTokenBasNumber
         );
-        console.log(result);
+        console.log({result});
         onClose();
     };
 

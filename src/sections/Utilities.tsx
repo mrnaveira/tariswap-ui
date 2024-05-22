@@ -32,15 +32,11 @@ function Utilities() {
     const faucet_template: string = import.meta.env.VITE_FAUCET_TEMPLATE;
     const pool_index_template: string = import.meta.env.VITE_POOL_INDEX_TEMPLATE;
     const pool_template: string = import.meta.env.VITE_POOL_TEMPLATE;
-    const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
 
     const { provider } = useTariProvider();
 
     const [newTokenName, setNewTokenName] = useState<string | null>(null);
     const [faucetComponent, setFaucetComponent] = useState<string | null>(null);
-
-    const [tokenA, setTokenA] = useState<string | null>(null);
-    const [tokenB, setTokenB] = useState<string | null>(null);
 
     const [removeLiquidityComponent, setRemoveLiquidityComponent] = useState<string | null>(null);
     const [removeLiquidityResource, setRemoveLiquidityResource] = useState<string | null>(null);
@@ -63,16 +59,6 @@ function Utilities() {
         console.log({ result });
     }
 
-    const handleCreatePool = async () => {
-        const result = await tariswap.createPool(provider, pool_index_component, tokenA, tokenB);
-        console.log({ result });
-    }
-
-    const handleListPools = async () => {
-        const pools = await tariswap.listPools(provider, pool_index_component);
-        console.log(pools);
-    }
-
     const handleRemoveLiquidity = async () => {
         const result = await tariswap.removeLiquidity(
             provider,
@@ -87,35 +73,8 @@ function Utilities() {
         setNewTokenName(event.target.value);
     };
 
-    const handleTokenA = async (event: any) => {
-        setTokenA(event.target.value);
-    };
-    const handleTokenB = async (event: any) => {
-        setTokenB(event.target.value);
-    };
-
     const handleFaucetComponent = async (event: any) => {
         setFaucetComponent(event.target.value);
-    };
-
-    const handleAddLiquidityComponent = async (event: any) => {
-        setAddLiquidityComponent(event.target.value);
-    };
-
-    const handleAddLiquidityResourceA = async (event: any) => {
-        setAddLiquidityResourceA(event.target.value);
-    };
-
-    const handleAddLiquidityResourceA_amount = async (event: any) => {
-        setAddLiquidityResourceA_amount(event.target.value);
-    };
-
-    const handleAddLiquidityResourceB = async (event: any) => {
-        setAddLiquidityResourceB(event.target.value);
-    };
-
-    const handleAddLiquidityResourceB_amount = async (event: any) => {
-        setAddLiquidityResourceB_amount(event.target.value);
     };
 
     const handleRemoveLiquidityComponent = async (event: any) => {
@@ -141,7 +100,7 @@ function Utilities() {
                         }}>
                     </TextField>
                 </Stack>
-                <Button variant='contained' onClick={async () => { await handleCreateToken(); }}>Create token</Button>
+                <Button variant='contained' onClick={async () => { await handleCreateToken(); }}>Create Token</Button>
             </Box>
         </Paper>
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
@@ -154,34 +113,12 @@ function Utilities() {
                         }}>
                     </TextField>
                 </Stack>
-                <Button variant='contained' onClick={async () => { await handleGetTokens(); }}>Get tokens</Button>
-            </Box>
-        </Paper>
-        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
-            <Button variant='contained' onClick={async () => { await handleCreateIndexComponent(); }}>Create index component</Button>
-        </Paper>
-        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
-            <Box sx={{ padding: 5, borderRadius: 4 }}>
-                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token A resource address"
-                        onChange={handleTokenA}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                    <TextField sx={{ mt: 1, width: '100%' }} id="tokenA" placeholder="Token B resource address"
-                        onChange={handleTokenB}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                </Stack>
-                <Button variant='contained' onClick={async () => { await handleCreatePool(); }}>Create pool</Button>
+                <Button variant='contained' onClick={async () => { await handleGetTokens(); }}>Take Tokens</Button>
             </Box>
         </Paper>
 
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
-            <Button variant='contained' onClick={async () => { await handleListPools(); }}>List pools</Button>
+            <Button variant='contained' onClick={async () => { await handleCreateIndexComponent(); }}>Create New Index Component</Button>
         </Paper>
 
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
@@ -208,7 +145,7 @@ function Utilities() {
                         </TextField>
                     </Stack>
                 </Stack>
-                <Button variant='contained' onClick={async () => { await handleRemoveLiquidity(); }}>Remove liquidity</Button>
+                <Button variant='contained' onClick={async () => { await handleRemoveLiquidity(); }}>Remove Liquidity</Button>
             </Box>
         </Paper>
     </Box>;
