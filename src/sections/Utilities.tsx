@@ -38,10 +38,6 @@ function Utilities() {
     const [newTokenName, setNewTokenName] = useState<string | null>(null);
     const [faucetComponent, setFaucetComponent] = useState<string | null>(null);
 
-    const [removeLiquidityComponent, setRemoveLiquidityComponent] = useState<string | null>(null);
-    const [removeLiquidityResource, setRemoveLiquidityResource] = useState<string | null>(null);
-    const [removeLiquidityAmount, setRemoveLiquidityAmount] = useState<number | null>(null);
-
     const handleCreateToken = async () => {
         const result = await faucet.createFaucet(provider, faucet_template, FAUCET_SUPPLY, newTokenName);
         console.log({ result });
@@ -59,34 +55,12 @@ function Utilities() {
         console.log({ result });
     }
 
-    const handleRemoveLiquidity = async () => {
-        const result = await tariswap.removeLiquidity(
-            provider,
-            removeLiquidityComponent,
-            removeLiquidityResource,
-            removeLiquidityAmount,
-        );
-        console.log(result);
-    }
-
     const handleNewTokenName = async (event: any) => {
         setNewTokenName(event.target.value);
     };
 
     const handleFaucetComponent = async (event: any) => {
         setFaucetComponent(event.target.value);
-    };
-
-    const handleRemoveLiquidityComponent = async (event: any) => {
-        setRemoveLiquidityComponent(event.target.value);
-    };
-
-    const handleRemoveLiquidityResource = async (event: any) => {
-        setRemoveLiquidityResource(event.target.value);
-    };
-
-    const handleRemoveLiquidityAmount = async (event: any) => {
-        setRemoveLiquidityAmount(event.target.value);
     };
 
     return <Box>
@@ -119,34 +93,6 @@ function Utilities() {
 
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
             <Button variant='contained' onClick={async () => { await handleCreateIndexComponent(); }}>Create New Index Component</Button>
-        </Paper>
-
-        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
-            <Box sx={{ padding: 5, borderRadius: 4 }}>
-                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '100%' }} id="removeLiquidityComponent" placeholder="Pool component address"
-                        onChange={handleRemoveLiquidityComponent}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                    <Stack direction="row" justifyContent="space-between" spacing={2}>
-                        <TextField sx={{ mt: 1, width: '70%' }} id="removeLiquidityResource" placeholder="Resource address"
-                            onChange={handleRemoveLiquidityResource}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                            }}>
-                        </TextField>
-                        <TextField sx={{ mt: 1, width: '30%' }} id="removeLiquidityAmount" placeholder="0"
-                            onChange={handleRemoveLiquidityAmount}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                            }}>
-                        </TextField>
-                    </Stack>
-                </Stack>
-                <Button variant='contained' onClick={async () => { await handleRemoveLiquidity(); }}>Remove Liquidity</Button>
-            </Box>
         </Paper>
     </Box>;
 }

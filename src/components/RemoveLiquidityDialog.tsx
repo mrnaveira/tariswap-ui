@@ -23,13 +23,13 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
     
     const { pool, onClose, open } = props;
 
-    const [lpToken, setLpToken] = useState<string | null>(null);
-    const [amount, setAmount] = useState<string | null>(null);
+    const [lpToken, setLpToken] = useState<string | null>("");
+    const [amount, setAmount] = useState<string | null>("");
 
     // clear dialog form each time it closes
     useEffect(() => {
         if (!open) {
-            setLpToken(null);
+            setLpToken("");
             setAmount("");
         }
     }, [open]);
@@ -86,7 +86,7 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
         <Dialog fullWidth={true} onClose={handleClose} open={open}>
             <Box sx={{ padding: 5, borderRadius: 4 }}>
                 <Stack direction="row" justifyContent="space-between" spacing={2}>
-                    <Typography style={{ fontSize: 24 }}>Add Liquidity</Typography>
+                    <Typography style={{ fontSize: 24 }}>Remove Liquidity</Typography>
                     <IconButton aria-label="copy" onClick={handleClose}>
                         <CloseIcon style={{ fontSize: 24 }} />
                     </IconButton>
@@ -95,8 +95,8 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
                 
                 <Stack direction="row" spacing={4} sx={{ mt: 2}} justifyContent="space-between">
                     <Stack direction='row' alignItems="center">
-                        <Typography style={{ fontSize: 16 }}>{truncateResource(pool.resourceA, 20)}</Typography>
-                        <IconButton aria-label="copy" onClick={() => copyToCliboard(pool.resourceA)}>
+                        <Typography style={{ fontSize: 16 }}>{truncateResource(lpToken, 20)}</Typography>
+                        <IconButton aria-label="copy" onClick={() => copyToCliboard(lpToken)}>
                             <ContentCopyIcon />
                         </IconButton>
                     </Stack>
