@@ -21,7 +21,7 @@
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import { useState } from "react";
-import { Box, Divider, Paper, Stack, TextField } from "@mui/material";
+import { Box, Paper, Stack, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import useTariProvider from "../store/provider.ts";
 import * as tariswap from "../tariswap.ts";
@@ -41,12 +41,6 @@ function Utilities() {
 
     const [tokenA, setTokenA] = useState<string | null>(null);
     const [tokenB, setTokenB] = useState<string | null>(null);
-
-    const [addLiquidityComponent, setAddLiquidityComponent] = useState<string | null>(null);
-    const [addLiquidityResourceA, setAddLiquidityResourceA] = useState<string | null>(null);
-    const [addLiquidityResourceA_amount, setAddLiquidityResourceA_amount] = useState<number | null>(null);
-    const [addLiquidityResourceB, setAddLiquidityResourceB] = useState<string | null>(null);
-    const [addLiquidityResourceB_amount, setAddLiquidityResourceB_amount] = useState<number | null>(null);
 
     const [removeLiquidityComponent, setRemoveLiquidityComponent] = useState<string | null>(null);
     const [removeLiquidityResource, setRemoveLiquidityResource] = useState<string | null>(null);
@@ -79,35 +73,12 @@ function Utilities() {
         console.log(pools);
     }
 
-    const handleAddLiquidity = async () => {
-        const result = await tariswap.addLiquidity(
-            provider,
-            addLiquidityComponent,
-            addLiquidityResourceA,
-            addLiquidityResourceA_amount,
-            addLiquidityResourceB,
-            addLiquidityResourceB_amount
-        );
-        console.log(result);
-    }
-
     const handleRemoveLiquidity = async () => {
         const result = await tariswap.removeLiquidity(
             provider,
             removeLiquidityComponent,
             removeLiquidityResource,
             removeLiquidityAmount,
-        );
-        console.log(result);
-    }
-
-    const handleSwap = async () => {
-        const result = await tariswap.swap(
-            provider,
-            swapComponent,
-            swapResource,
-            swapResource_amount,
-            swapOutputResource
         );
         console.log(result);
     }
@@ -211,48 +182,6 @@ function Utilities() {
 
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
             <Button variant='contained' onClick={async () => { await handleListPools(); }}>List pools</Button>
-        </Paper>
-
-        <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
-            <Box sx={{ padding: 5, borderRadius: 4 }}>
-                <Stack sx={{ mb: 2 }} direction="column" justifyContent="space-between" spacing={2}>
-                    <TextField sx={{ mt: 1, width: '100%' }} id="addLiquidityComponent" placeholder="Pool component address"
-                        onChange={handleAddLiquidityComponent}
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}>
-                    </TextField>
-                    <Stack direction="row" justifyContent="space-between" spacing={2}>
-                        <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceA" placeholder="Resource address"
-                            onChange={handleAddLiquidityResourceA}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                            }}>
-                        </TextField>
-                        <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceA_amount" placeholder="0"
-                            onChange={handleAddLiquidityResourceA_amount}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                            }}>
-                        </TextField>
-                    </Stack>
-                    <Stack direction="row" justifyContent="space-between" spacing={2}>
-                        <TextField sx={{ mt: 1, width: '70%' }} id="addLiquidityResourceB" placeholder="Resource address"
-                            onChange={handleAddLiquidityResourceB}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                            }}>
-                        </TextField>
-                        <TextField sx={{ mt: 1, width: '30%' }} id="addLiquidityResourceB_amount" placeholder="0"
-                            onChange={handleAddLiquidityResourceB_amount}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                            }}>
-                        </TextField>
-                    </Stack>
-                </Stack>
-                <Button variant='contained' onClick={async () => { await handleAddLiquidity(); }}>Add liquidity</Button>
-            </Box>
         </Paper>
 
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
