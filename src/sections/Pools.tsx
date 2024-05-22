@@ -29,6 +29,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { copyToCliboard, truncateResource } from "../utils/text.ts";
 import { AddLiquidityDialog } from "../components/AddLiquidityDialog.tsx";
 import { CreatePoolDialog } from "../components/CreatePoolDialog.tsx";
+import { RemoveLiquidityDialog } from "../components/RemoveLiquidityDialog.tsx";
 
 function Pools() {
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
@@ -38,6 +39,7 @@ function Pools() {
     const [pools, setPools] = useState<object[]>([]);
     const [selectedPool, setSelectedPool] = useState<object | null>(null);
     const [addLiquidityDialogOpen, setAddLiquidityDialogOpen] = useState(false);
+    const [removeLiquidityDialogOpen, setRemoveLiquidityDialogOpen] = useState(false);
     const [createPoolDialogOpen, setCreatePoolDialogOpen] = useState(false);
 
     const refreshPools = () => {
@@ -62,6 +64,11 @@ function Pools() {
     const handleAddLiquidity = async (pool: object) => {
         setSelectedPool(pool);
         setAddLiquidityDialogOpen(true);
+    };
+
+    const handleRemoveLiquidity = async (pool: object) => {
+        setSelectedPool(pool);
+        setRemoveLiquidityDialogOpen(true);
     };
 
     const handleCreatePoolOpen = async () => {
@@ -101,6 +108,7 @@ function Pools() {
                                 Add Liquidity
                             </Button>
                             <Button variant="contained"
+                                onClick={() => {handleRemoveLiquidity(pool)}}
                                 sx={{ borderRadius: 1, fontSize: 16, textTransform: 'none' }}>
                                 Remove Liquidity
                             </Button>
@@ -119,6 +127,12 @@ function Pools() {
         <AddLiquidityDialog
             open={addLiquidityDialogOpen}
             onClose={() => {setAddLiquidityDialogOpen(false)}}
+            pool={selectedPool}
+        />
+
+        <RemoveLiquidityDialog
+            open={removeLiquidityDialogOpen}
+            onClose={() => {setRemoveLiquidityDialogOpen(false)}}
             pool={selectedPool}
         />
 
