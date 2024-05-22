@@ -66,6 +66,16 @@ export async function listPools(provider: TariProvider, pool_index_component: st
     return pool_data
 }
 
+export async function getPoolLiquidityResource(provider: TariProvider, pool_component: string) {
+    const substate = await wallet.getSubstate(provider, pool_component);
+
+    // extract the map of pools from the index substate
+    const component_body = substate.value.substate.Component.body.state;
+    const lpResource = cbor.getValueByPath(component_body, "$.lp_resource");
+    
+    return lpResource
+}
+
 export async function addLiquidity(
     provider: TariProvider,
     pool_component: string,

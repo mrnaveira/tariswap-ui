@@ -23,11 +23,13 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
     
     const { pool, onClose, open } = props;
 
+    const [lpToken, setLpToken] = useState<string | null>(null);
     const [amount, setAmount] = useState<string | null>(null);
 
     // clear dialog form each time it closes
     useEffect(() => {
         if (!open) {
+            setLpToken(null);
             setAmount("");
         }
     }, [open]);
@@ -35,6 +37,13 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
     useEffect(() => {
        if (pool) {
             console.log({pool});
+            tariswap.getPoolLiquidityResource(provider, pool.poolComponent)
+                .then(lpResource => {
+                    setLpToken(lpResource);
+                })
+                .catch(e => {
+                    console.error(e);
+                });
        }
     }, [pool]);
 
@@ -47,21 +56,25 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
     };
 
     const handleRemoveLiquidity = async () => {
+        if (!pool || !lpToken) {
+            console.error("Invalid pool");
+            return;
+        }
+
         const amountNumber = parseInt(amount);
         if (!amountNumber || amountNumber <= 0) {
             console.error("Invalid amount");
             return;
         }
 
-        /*
         const result = await tariswap.removeLiquidity(
             provider,
-            removeLiquidityComponent,
-            removeLiquidityResource,
-            removeLiquidityAmount,
+            pool.poolComponent,
+            lpToken,
+            amountNumber,
         );
         console.log({result});
-        */
+
         onClose();
     };
 
