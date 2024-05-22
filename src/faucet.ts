@@ -18,8 +18,6 @@ export async function createFaucet(provider: TariProvider, faucet_template: stri
     ];
 
     let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
-    // result.result.execution_results[0].indexed.value (cbor encoded ComponentAddress)
-    // result.result.result.Accept.up_substates => find (s => s.0.Component && s.1.version == 0)
     return result;
 }
 

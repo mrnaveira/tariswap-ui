@@ -19,8 +19,6 @@ export async function createPoolIndex(provider: TariProvider, pool_index_templat
     ];
 
     let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
-    // result.result.transaction_id
-    // result.result.execution_results[0].indexed.value   (cbor encoded ComponentAddress)
     return result;
 }
 

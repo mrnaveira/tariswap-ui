@@ -26,6 +26,7 @@ import Button from "@mui/material/Button";
 import useTariProvider from "../store/provider.ts";
 import * as tariswap from "../tariswap.ts";
 import * as faucet from "../faucet.ts";
+import * as cbor from "../cbor.ts";
 
 function Utilities() {
     const FAUCET_SUPPLY: number = 1_000_000;
@@ -39,8 +40,13 @@ function Utilities() {
     const [faucetComponent, setFaucetComponent] = useState<string | null>(null);
 
     const handleCreateToken = async () => {
+        console.log({faucet_template, FAUCET_SUPPLY, newTokenName});
         const result = await faucet.createFaucet(provider, faucet_template, FAUCET_SUPPLY, newTokenName);
         console.log({ result });
+        const componentAddress = cbor.convertCborValue(result.result.execution_results[0].indexed.value);
+        // result.result.execution_results[0].indexed.value (cbor encoded ComponentAddress)
+        // result.result.result.Accept.up_substates => find (s => s.0.Component && s.1.version == 0)
+        console.log({ componentAddress });
     }
 
     const handleGetTokens = async () => {
@@ -52,7 +58,8 @@ function Utilities() {
         //TODO: constant?
         const market_fee = 10;
         const result = await tariswap.createPoolIndex(provider, pool_index_template, pool_template, market_fee);
-        console.log({ result });
+        const componentAddress = cbor.convertCborValue(result.result.execution_results[0].indexed.value);
+        console.log({componentAddress});
     }
 
     const handleNewTokenName = async (event: any) => {
