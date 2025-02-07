@@ -37,15 +37,19 @@ export function CreatePoolDialog(props: CreatePoolDialogProps) {
         onClose();
     };
 
-    const handleTokenA = async (event) => {
+    const handleTokenA = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setTokenA(event.target.value);
     };
 
-    const handleTokenB = async (event) => {
+    const handleTokenB = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setTokenB(event.target.value);
     };
 
     const handleCreatePool = async () => {
+        if (!provider) {
+            console.error("Provider is not set");
+            return;
+        }
         if (!tokenA || !tokenB) {
             console.error("Invalid tokens");
             return;

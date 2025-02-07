@@ -1,4 +1,4 @@
-import { TariProvider } from "@tariproject/tarijs";
+import { TariProvider } from "@tari-project/tarijs";
 import * as wallet from "./wallet.ts";
 
 export async function createFaucet(provider: TariProvider, faucet_template: string, initial_supply: number, symbol: string) {
@@ -17,7 +17,7 @@ export async function createFaucet(provider: TariProvider, faucet_template: stri
         {substate_id: account.address},
     ];
 
-    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    const result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
     return result;
 }
 
@@ -49,7 +49,7 @@ export async function takeFreeCoins(provider: TariProvider, faucet_component: st
         {substate_id: faucet_component},
     ];
 
-    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    const result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }

@@ -20,8 +20,9 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import { toHexString } from "@tariproject/tarijs/dist/utils";
+import { toHexString } from "@tari-project/tarijs/dist/utils";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const renderJson = (json: any) => {
   if (Array.isArray(json)) {
     if (json.length == 32) {

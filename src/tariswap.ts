@@ -1,6 +1,12 @@
-import { TariProvider } from "@tariproject/tarijs";
+import { TariProvider } from "@tari-project/tarijs";
 import * as wallet from "./wallet.ts";
 import * as cbor from "./cbor.ts";
+
+export interface PoolProps {
+    resourceA: string;
+    resourceB: string;
+    poolComponent: string;
+}
 
 export async function createPoolIndex(provider: TariProvider, pool_index_template: string, pool_template: string, market_fee: number) {
     const account = await provider.getAccount();
@@ -18,7 +24,7 @@ export async function createPoolIndex(provider: TariProvider, pool_index_templat
         {substate_id: account.address},
     ];
 
-    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    const result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
     return result;
 }
 
@@ -39,17 +45,25 @@ export async function createPool(provider: TariProvider, pool_index_component: s
         {substate_id: pool_index_component},
     ];
 
-    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    const result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }
 
-export async function listPools(provider: TariProvider, pool_index_component: string) {
+export async function listPools(provider: TariProvider, pool_index_component: string): Promise<PoolProps[]> {
     const substate = await wallet.getSubstate(provider, pool_index_component);
 
     // extract the map of pools from the index substate
-    const component_body = substate.value.substate.Component.body.state.Map;
-    const pools_field = component_body.find((field) => field[0].Text == "pools")
+    const component_body = substate.value.Component.body.state.Map as {
+      Text: string;
+      Map: {
+        Array: string[];
+      }[][];
+    }[][];
+    const pools_field = component_body.find((field) => field[0].Text == "pools");
+    if (!pools_field) {
+        return [];
+    }
     const pools_value = pools_field[1].Map;
 
     // extract the resource addresses and the pool component for each pool
@@ -68,9 +82,9 @@ export async function getPoolLiquidityResource(provider: TariProvider, pool_comp
     const substate = await wallet.getSubstate(provider, pool_component);
 
     // extract the map of pools from the index substate
-    const component_body = substate.value.substate.Component.body.state;
+    const component_body = substate.value.Component.body.state;
     const lpResource = cbor.getValueByPath(component_body, "$.lp_resource");
-    
+
     return lpResource
 }
 
@@ -135,7 +149,7 @@ export async function addLiquidity(
         {substate_id: pool_component}
     ];
 
-    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    const result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }
@@ -189,7 +203,7 @@ export async function removeLiquidity(provider: TariProvider, pool_component: st
         {substate_id: pool_component}
     ];
 
-    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    const result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }
@@ -235,7 +249,7 @@ export async function swap(provider: TariProvider, pool_component: string, input
         {substate_id: pool_component}
     ];
 
-    let result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
+    const result = await wallet.submitAndWaitForTransaction(provider, account, instructions, required_substates);
 
     return result;
 }

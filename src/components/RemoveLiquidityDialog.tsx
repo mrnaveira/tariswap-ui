@@ -14,13 +14,13 @@ import * as tariswap from "../tariswap.ts";
 
 export interface RemoveLiquidityDialogProps {
     open: boolean;
-    pool: object | null,
+    pool: tariswap.PoolProps | null,
     onClose: () => void;
 }
 
 export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
     const { provider } = useTariProvider();
-    
+
     const { pool, onClose, open } = props;
 
     const [lpToken, setLpToken] = useState<string | null>("");
@@ -35,7 +35,7 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
     }, [open]);
 
     useEffect(() => {
-       if (pool) {
+       if (pool && provider) {
             console.log({pool});
             tariswap.getPoolLiquidityResource(provider, pool.poolComponent)
                 .then(lpResource => {
@@ -45,17 +45,25 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
                     console.error(e);
                 });
        }
-    }, [pool]);
+    }, [pool, provider]);
 
     const handleClose = () => {
         onClose();
     };
 
-    const handleAmount = async (event) => {
+    const handleAmount = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(event.target.value);
     };
 
     const handleRemoveLiquidity = async () => {
+        if (!provider) {
+            console.error("Provider is not set");
+            return;
+        }
+        if (!amount) {
+            console.error("Missing amount");
+            return;
+        }
         if (!pool || !lpToken) {
             console.error("Invalid pool");
             return;
@@ -92,11 +100,11 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
                     </IconButton>
                 </Stack>
                 <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
-                
+
                 <Stack direction="row" spacing={4} sx={{ mt: 2}} justifyContent="space-between">
                     <Stack direction='row' alignItems="center">
-                        <Typography style={{ fontSize: 16 }}>{truncateResource(lpToken, 20)}</Typography>
-                        <IconButton aria-label="copy" onClick={() => copyToCliboard(lpToken)}>
+                        <Typography style={{ fontSize: 16 }}>{lpToken ? truncateResource(lpToken, 20) : ""}</Typography>
+                        <IconButton aria-label="copy" onClick={() => lpToken && copyToCliboard(lpToken)}>
                             <ContentCopyIcon />
                         </IconButton>
                     </Stack>
@@ -111,14 +119,14 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
                         }} />
                 </Stack>
 
-                <Stack direction="row" justifyContent="center" sx={{ mt: 5, width: '100%' }}>         
+                <Stack direction="row" justifyContent="center" sx={{ mt: 5, width: '100%' }}>
                     <Button variant="contained"
                     onClick={async () => { await handleRemoveLiquidity(); }}
                     sx={{ borderRadius: 1, fontSize: 18, textTransform: 'none' }}>
                         Remove Liquidity
                     </Button>
                 </Stack>
-                
+
 
             </Box>
         </Dialog >

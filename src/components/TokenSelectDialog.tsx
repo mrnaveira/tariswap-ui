@@ -37,13 +37,13 @@ export function TokenSelectDialog(props: TokenSelectDialogProps) {
                 </Stack>
                 <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
                 <List sx={{ width: '100%' }}>
-                    <ListItemButton onClick={(_) => handleTokenSelect(null)}>
-                        <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>Clear</Typography> 
+                    <ListItemButton onClick={() => handleTokenSelect(null)}>
+                        <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>Clear</Typography>
                     </ListItemButton>
                     {
                         tokens.map(token => (
-                            <ListItemButton onClick={(_) => handleTokenSelect(token)}>
-                                 <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>{truncateText(token, 40)}</Typography> 
+                            <ListItemButton onClick={() => handleTokenSelect(token)}>
+                                 <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>{truncateText(token, 40)}</Typography>
                             </ListItemButton>
                         ))
                     }

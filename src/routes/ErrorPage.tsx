@@ -33,7 +33,8 @@ export default function ErrorPage() {
   console.error(error);
 
   const getErrorText = (e: ErrorType): string => {
-    let value = (e as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const value = (e as any);
     return value?.message || value?.statusText || value || "Unknown error";
   }
 

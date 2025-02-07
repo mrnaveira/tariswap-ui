@@ -40,33 +40,55 @@ function Utilities() {
     const [faucetComponent, setFaucetComponent] = useState<string | null>(null);
 
     const handleCreateToken = async () => {
+        if (!provider) {
+          console.log("Provider is not set");
+          return;
+        }
+        if (!newTokenName) {
+          console.log("New token name is not set");
+          return;
+        }
         console.log({faucet_template, FAUCET_SUPPLY, newTokenName});
         const result = await faucet.createFaucet(provider, faucet_template, FAUCET_SUPPLY, newTokenName);
         console.log({ result });
-        const componentAddress = cbor.convertCborValue(result.result.execution_results[0].indexed.value);
+        const response = result.result as { execution_results: { indexed: { value: string}}[]};
+        const componentAddress = cbor.convertCborValue(response.execution_results[0].indexed.value);
         // result.result.execution_results[0].indexed.value (cbor encoded ComponentAddress)
         // result.result.result.Accept.up_substates => find (s => s.0.Component && s.1.version == 0)
         console.log({ componentAddress });
     }
 
     const handleGetTokens = async () => {
+        if (!provider) {
+          console.log("Provider is not set");
+          return;
+        }
+        if (!faucetComponent) {
+          console.log("Faucet component is not set");
+          return;
+        }
         const result = await faucet.takeFreeCoins(provider, faucetComponent);
         console.log({ result });
     }
 
     const handleCreateIndexComponent = async () => {
+        if (!provider) {
+          console.log("Provider is not set");
+          return;
+        }
         //TODO: constant?
         const market_fee = 10;
         const result = await tariswap.createPoolIndex(provider, pool_index_template, pool_template, market_fee);
-        const componentAddress = cbor.convertCborValue(result.result.execution_results[0].indexed.value);
+        const response = result.result as { execution_results: { indexed: { value: string}}[]};
+        const componentAddress = cbor.convertCborValue(response.execution_results[0].indexed.value);
         console.log({componentAddress});
     }
 
-    const handleNewTokenName = async (event: any) => {
+    const handleNewTokenName = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setNewTokenName(event.target.value);
     };
 
-    const handleFaucetComponent = async (event: any) => {
+    const handleFaucetComponent = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setFaucetComponent(event.target.value);
     };
 

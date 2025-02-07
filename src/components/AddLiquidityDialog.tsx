@@ -12,15 +12,16 @@ import { useEffect, useState } from "react";
 import useTariProvider from "../store/provider";
 import * as tariswap from "../tariswap.ts";
 
+
 export interface AddLiquidityDialogProps {
     open: boolean;
-    pool: object | null,
+    pool: tariswap.PoolProps | null,
     onClose: () => void;
 }
 
 export function AddLiquidityDialog(props: AddLiquidityDialogProps) {
     const { provider } = useTariProvider();
-    
+
     const { pool, onClose, open } = props;
 
     const [amountTokenA, setAmountTokenA] = useState<string | null>(null);
@@ -38,15 +39,20 @@ export function AddLiquidityDialog(props: AddLiquidityDialogProps) {
         onClose();
     };
 
-    const handleAmountTokenA = async (event) => {
+    const handleAmountTokenA = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setAmountTokenA(event.target.value);
     };
 
-    const handleAmountTokenB = async (event) => {
+    const handleAmountTokenB = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setAmountTokenB(event.target.value);
     };
 
     const handleAddLiquidity = async () => {
+        if (!amountTokenA || !amountTokenB || !provider || !pool) {
+            console.error("Required data is missing");
+            return;
+        }
+
         const amountTokenAasNumber = parseInt(amountTokenA);
         if (!amountTokenAasNumber || amountTokenAasNumber <= 0) {
             console.error("Invalid amount");
@@ -85,7 +91,7 @@ export function AddLiquidityDialog(props: AddLiquidityDialogProps) {
                     </IconButton>
                 </Stack>
                 <Divider sx={{ mt: 3, mb: 3 }} variant="middle" />
-                
+
                 <Stack direction="row" spacing={4} sx={{ mt: 2}} justifyContent="space-between">
                     <Stack direction='row' alignItems="center">
                         <Typography style={{ fontSize: 16 }}>{truncateResource(pool.resourceA, 20)}</Typography>
@@ -122,14 +128,14 @@ export function AddLiquidityDialog(props: AddLiquidityDialogProps) {
                         }} />
                 </Stack>
 
-                <Stack direction="row" justifyContent="center" sx={{ mt: 5, width: '100%' }}>         
+                <Stack direction="row" justifyContent="center" sx={{ mt: 5, width: '100%' }}>
                     <Button variant="contained"
                     onClick={async () => { await handleAddLiquidity(); }}
                     sx={{ borderRadius: 1, fontSize: 18, textTransform: 'none' }}>
                         Add Liquidity
                     </Button>
                 </Stack>
-                
+
 
             </Box>
         </Dialog >

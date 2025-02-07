@@ -33,7 +33,7 @@ interface AlertDialogProps {
   dialogTitle?: string;
   dialogDescription?: string;
   confirmTitle?: string;
-  confirmFunction?: any;
+  confirmFunction?: () => void;
   cancelTitle?: string;
 }
 
@@ -53,7 +53,9 @@ export function ConfirmDialog({
 
   const handleClose = () => {
     setOpen(false);
-    confirmFunction();
+    if (confirmFunction) {
+      confirmFunction();
+    }
   };
 
   return (

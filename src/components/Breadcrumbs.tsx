@@ -38,6 +38,7 @@ interface BreadcrumbsProps {
 const BreadcrumbsComponent: React.FC<BreadcrumbsProps> = ({ items }) => {
   const breadcrumbs = useBreadcrumbs(items);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const links = breadcrumbs.map(({ match, breadcrumb }: any) => {
     const breadcrumbLabel = breadcrumb.props.children;
     const { label, path, dynamic } = match.route;

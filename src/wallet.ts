@@ -1,12 +1,14 @@
-import {Settings} from "./routes/home/SettingsForm.tsx";
 import {
     FunctionDef,
     Instruction,
     SubstateType,
     Arg,
-} from "@tariproject/wallet_jrpc_client";
+} from "@tari-project/wallet_jrpc_client";
 
-import { TariProvider, MetamaskTariProvider, WalletDaemonTariProvider, TransactionStatus, SubmitTransactionRequest, Account, SubstateRequirement } from "@tariproject/tarijs";
+import { TariProvider, WalletDaemonTariProvider, TransactionStatus, SubmitTransactionRequest, Account, SubstateRequirement } from "@tari-project/tarijs";
+import { Settings } from "./store/settings.ts";
+
+const network: number = parseInt(import.meta.env.VITE_NETWORK);
 
 export async function getTemplateDefinition<T extends TariProvider>(
     provider: T,
@@ -29,7 +31,9 @@ export async function listSubstates<T extends TariProvider>(
     }
     const substates = await (provider as unknown as WalletDaemonTariProvider).listSubstates(
         template,
-        substateType
+        substateType,
+        0,
+        1000,
     );
     return substates;
 }
@@ -38,13 +42,11 @@ export async function createFreeTestCoins<T extends TariProvider>(provider: T) {
     console.log("createFreeTestCoins", provider.providerName);
     switch (provider.providerName) {
         case "WalletDaemon":
+          {
             const walletProvider = provider as unknown as WalletDaemonTariProvider;
             await walletProvider.createFreeTestCoins();
             break;
-        case "Metamask":
-            const metamaskProvider = provider as unknown as MetamaskTariProvider;
-            await metamaskProvider.createFreeTestCoins(0);
-            break;
+          }
         default:
             throw new Error(`Unsupported provider: ${provider.providerName}`);
     }
@@ -74,7 +76,7 @@ export async function buildInstructionsAndSubmit(
 
     const resp = await provider.submitTransaction(req);
 
-    let result = await waitForTransactionResult(provider, resp.transaction_id);
+    const result = await waitForTransactionResult(provider, resp.transaction_id);
 
     return result;
 }
@@ -91,6 +93,7 @@ export async function submitAndWaitForTransaction(provider: TariProvider, accoun
         }
     ];
     const req: SubmitTransactionRequest = {
+        network,
         account_id: account.account_id,
         fee_instructions,
         instructions: instructions as object[],
@@ -99,12 +102,14 @@ export async function submitAndWaitForTransaction(provider: TariProvider, accoun
         required_substates,
         is_dry_run: false,
         min_epoch: null,
-        max_epoch: null
+        max_epoch: null,
+        is_seal_signer_authorized: true,
+        detect_inputs_use_unversioned: true,
     };
 
     const resp = await provider.submitTransaction(req);
 
-    let result = await waitForTransactionResult(provider, resp.transaction_id);
+    const result = await waitForTransactionResult(provider, resp.transaction_id);
 
     return result;
 }
@@ -197,8 +202,6 @@ export async function createTransactionRequest(
             }
         };
 
-    func.output
-
     let nextInstructions: Instruction[] = [];
     if (typeof func.output === 'object' && "Other" in func.output && func.output.Other.name === "Bucket") {
         nextInstructions = [
@@ -209,7 +212,8 @@ export async function createTransactionRequest(
                 CallMethod: {
                     component_address: account.address,
                     method: "deposit",
-                    args: [{ Workspace: [bucketId] }],
+                    // TODO:
+                    args: [{ Workspace: [bucketId] } as unknown as string],
                 }
             }
         ];
@@ -231,6 +235,7 @@ export async function createTransactionRequest(
     }
 
     return {
+        network,
         account_id: account.account_id,
         fee_instructions,
         instructions: instructions as object[],
@@ -239,6 +244,8 @@ export async function createTransactionRequest(
         required_substates,
         is_dry_run: false,
         min_epoch: null,
-        max_epoch: null
+        max_epoch: null,
+        is_seal_signer_authorized: true,
+        detect_inputs_use_unversioned: true,
     };
 }

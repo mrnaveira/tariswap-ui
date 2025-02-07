@@ -36,8 +36,8 @@ function Pools() {
 
     const { provider } = useTariProvider();
 
-    const [pools, setPools] = useState<object[]>([]);
-    const [selectedPool, setSelectedPool] = useState<object | null>(null);
+    const [pools, setPools] = useState<tariswap.PoolProps[]>([]);
+    const [selectedPool, setSelectedPool] = useState<tariswap.PoolProps | null>(null);
     const [addLiquidityDialogOpen, setAddLiquidityDialogOpen] = useState(false);
     const [removeLiquidityDialogOpen, setRemoveLiquidityDialogOpen] = useState(false);
     const [createPoolDialogOpen, setCreatePoolDialogOpen] = useState(false);
@@ -61,12 +61,12 @@ function Pools() {
         refreshPools();
     }, []);
 
-    const handleAddLiquidity = async (pool: object) => {
+    const handleAddLiquidity = async (pool: tariswap.PoolProps) => {
         setSelectedPool(pool);
         setAddLiquidityDialogOpen(true);
     };
 
-    const handleRemoveLiquidity = async (pool: object) => {
+    const handleRemoveLiquidity = async (pool: tariswap.PoolProps) => {
         setSelectedPool(pool);
         setRemoveLiquidityDialogOpen(true);
     };

@@ -8,7 +8,7 @@ The `tariswap` template implements a decentralized exchange smart contract on th
 
 We need a running Tari network with the following:
 * A deployed [Tari Metamask Snap](https://github.com/tari-project/tari-snap)
-* Both `tariswap_index` and `tariswap_pool` templates deployed. The code can be found in the Tari [test-templates](https://github.com/tari-project/test-templates/tree/main/src/tariswap/templates) repository.
+* Both `tariswap_index` and `tariswap_pool` templates deployed. The code can be found in the Tari [test-templates](https://github.com/tari-project/test-templates/tree/main/templates/tariswap/templates) repository.
 * The `faucet` template deployed. It can be found in the Tari [template_test_tooling](https://github.com/tari-project/tari-dan/tree/development/dan_layer/template_test_tooling/templates/faucet) crate.
 
 Copy the `.env.example` file to `.env` and edit the correct environment variable values.

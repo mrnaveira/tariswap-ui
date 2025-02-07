@@ -35,7 +35,7 @@ function Swap() {
 
     const { provider } = useTariProvider();
 
-    const [pools, setPools] = useState<object[]>([]);
+    const [pools, setPools] = useState<tariswap.PoolProps[]>([]);
 
     const [selectedInputToken, setSelectedInputToken] = useState<string | null>(null);
     const [selectedOutputToken, setSelectedOutputToken] = useState<string | null>(null);
@@ -60,7 +60,7 @@ function Swap() {
                 console.log(pools);
 
                 let tokens: string[] = [];
-                pools.forEach((pool: object) => {
+                pools.forEach((pool: tariswap.PoolProps) => {
                     tokens.push(pool.resourceA);
                     tokens.push(pool.resourceB);
                 });
@@ -107,12 +107,20 @@ function Swap() {
         setInputTokens(getCorrespondingPoolTokens(token));
     };
 
-    const handleInputAmount = async (event) => {
+    const handleInputAmount = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputAmount(event.target.value);
     };
 
     const handleSwap = async () => {
-        let inputAmountNumber = parseInt(inputAmount);
+        if (!provider) {
+            console.error("Provider is not set");
+            return;
+        }
+        if (!inputAmount || !selectedInputToken || !selectedOutputToken) {
+            console.error("Required data is missing");
+            return;
+        }
+        const inputAmountNumber = parseInt(inputAmount);
         if (!inputAmountNumber || inputAmountNumber <= 0) {
             console.error("Invalid amount");
             return;
@@ -136,7 +144,7 @@ function Swap() {
             inputAmountNumber,
             selectedOutputToken
         });
-        
+
         const result = await tariswap.swap(
             provider,
             poolComponent,
@@ -149,7 +157,7 @@ function Swap() {
 
     const canSwap = () => {
         return selectedInputToken && selectedOutputToken;
-    } 
+    }
 
     return <Box>
         <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>

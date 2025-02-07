@@ -1,6 +1,8 @@
 // Copyright 2024 The Tari Project
 // SPDX-License-Identifier: BSD-3-Clause
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export type CborValue = { Map: Array<[any, any]> } |
   { Array: Array<any> } |
   { Tag: number } |
@@ -68,7 +70,7 @@ export function convertCborValue(value: any): any {
   return value;
 }
 
-function bytesToAddressString(type: String, tag: ArrayLike<number>): string {
+function bytesToAddressString(type: string, tag: ArrayLike<number>): string {
   const hex = Array.from(tag, function(byte) {
     return ("0" + (byte & 0xff).toString(16)).slice(-2);
   }).join("");

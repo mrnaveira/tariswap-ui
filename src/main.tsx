@@ -4,7 +4,7 @@ import "./theme/theme.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./routes/ErrorPage";
-import { TariProvider, MetaMaskInpageProvider } from "@tariproject/tarijs";
+import { TariProvider } from "@tari-project/tarijs";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +28,5 @@ declare global {
 
   interface Window {
     tari: TariProvider;
-    ethereum: MetaMaskInpageProvider;
   }
 }
