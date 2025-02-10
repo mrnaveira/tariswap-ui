@@ -11,6 +11,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useEffect, useState } from "react";
 import useTariProvider from "../store/provider.ts";
 import * as tariswap from "../tariswap.ts";
+import { useSnackbar } from "./SnackbarContext.tsx";
+import { useBackdrop } from "./BackdropContext.tsx";
 
 export interface RemoveLiquidityDialogProps {
     open: boolean;
@@ -20,6 +22,8 @@ export interface RemoveLiquidityDialogProps {
 
 export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
     const { provider } = useTariProvider();
+    const { showSnackbar } = useSnackbar();
+    const { openBackdrop, closeBackdrop } = useBackdrop();
 
     const { pool, onClose, open } = props;
 
@@ -43,6 +47,7 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
                 })
                 .catch(e => {
                     console.error(e);
+                    showSnackbar("Failed to fetch pool liquidity resource", "error");
                 });
        }
     }, [pool, provider]);
@@ -57,31 +62,39 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
 
     const handleRemoveLiquidity = async () => {
         if (!provider) {
-            console.error("Provider is not set");
-            return;
-        }
-        if (!amount) {
-            console.error("Missing amount");
+            showSnackbar("Provider is not set", "error");
             return;
         }
         if (!pool || !lpToken) {
-            console.error("Invalid pool");
+            showSnackbar("Pool is not set", "error");
+            return;
+        }
+        if (!amount) {
+            showSnackbar("Please, provide the amount", "error");
             return;
         }
 
         const amountNumber = parseInt(amount);
         if (!amountNumber || amountNumber <= 0) {
-            console.error("Invalid amount");
+            showSnackbar("Invalid amount", "error");
             return;
         }
 
-        const result = await tariswap.removeLiquidity(
-            provider,
-            pool.poolComponent,
-            lpToken,
-            amountNumber,
-        );
-        console.log({result});
+        openBackdrop();
+        try {
+          const result = await tariswap.removeLiquidity(
+              provider,
+              pool.poolComponent,
+              lpToken,
+              amountNumber,
+          );
+          console.log({result});
+          showSnackbar("Liquidity was removed!", "success");
+        } catch (error) {
+          console.log(error);
+          showSnackbar("Failed to remove the liquidity", "error");
+        }
+        closeBackdrop();
 
         onClose();
     };

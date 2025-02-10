@@ -11,6 +11,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useEffect, useState } from "react";
 import useTariProvider from "../store/provider";
 import * as tariswap from "../tariswap.ts";
+import { useSnackbar } from "./SnackbarContext.tsx";
+import { useBackdrop } from "./BackdropContext.tsx";
 
 
 export interface AddLiquidityDialogProps {
@@ -21,6 +23,8 @@ export interface AddLiquidityDialogProps {
 
 export function AddLiquidityDialog(props: AddLiquidityDialogProps) {
     const { provider } = useTariProvider();
+    const { showSnackbar } = useSnackbar();
+    const { openBackdrop, closeBackdrop } = useBackdrop();
 
     const { pool, onClose, open } = props;
 
@@ -48,32 +52,43 @@ export function AddLiquidityDialog(props: AddLiquidityDialogProps) {
     };
 
     const handleAddLiquidity = async () => {
-        if (!amountTokenA || !amountTokenB || !provider || !pool) {
-            console.error("Required data is missing");
+        if (!provider || !pool) {
+            showSnackbar("Required data is missing", "error");
+            return;
+        }
+        if (!amountTokenA || !amountTokenB) {
+            showSnackbar("Enter liquidity amounts", "error");
             return;
         }
 
         const amountTokenAasNumber = parseInt(amountTokenA);
         if (!amountTokenAasNumber || amountTokenAasNumber <= 0) {
-            console.error("Invalid amount");
+            showSnackbar("First amount is invalid", "error");
             return;
         }
         const amountTokenBasNumber = parseInt(amountTokenB);
         if (!amountTokenBasNumber || amountTokenBasNumber <= 0) {
-            console.error("Invalid amount");
+            showSnackbar("Second amount is invalid", "error");
             return;
         }
 
-
-        const result = await tariswap.addLiquidity(
-            provider,
-            pool.poolComponent,
-            pool.resourceA,
-            amountTokenAasNumber,
-            pool.resourceB,
-            amountTokenBasNumber
-        );
-        console.log({result});
+        openBackdrop();
+        try {
+          const result = await tariswap.addLiquidity(
+              provider,
+              pool.poolComponent,
+              pool.resourceA,
+              amountTokenAasNumber,
+              pool.resourceB,
+              amountTokenBasNumber
+          );
+          console.log({result});
+          showSnackbar("Liquidity was added!", "success");
+        } catch (error) {
+          console.log(error);
+          showSnackbar("Failed to add liquidity", "error");
+        }
+        closeBackdrop();
         onClose();
     };
 

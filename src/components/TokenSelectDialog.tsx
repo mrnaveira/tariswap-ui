@@ -41,8 +41,8 @@ export function TokenSelectDialog(props: TokenSelectDialogProps) {
                         <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>Clear</Typography>
                     </ListItemButton>
                     {
-                        tokens.map(token => (
-                            <ListItemButton onClick={() => handleTokenSelect(token)}>
+                        tokens.map((token, index) => (
+                            <ListItemButton key={index} onClick={() => handleTokenSelect(token)}>
                                  <Typography flexGrow="1" textAlign="center" style={{ fontSize: 18 }}>{truncateText(token, 40)}</Typography>
                             </ListItemButton>
                         ))

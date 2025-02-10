@@ -29,11 +29,15 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { TokenSelectDialog } from "../components/TokenSelectDialog.tsx";
 import { truncateResource } from "../utils/text.ts";
+import { useSnackbar } from "../components/SnackbarContext.tsx";
+import { useBackdrop } from "../components/BackdropContext.tsx";
 
 function Swap() {
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
 
     const { provider } = useTariProvider();
+    const { showSnackbar } = useSnackbar();
+    const { openBackdrop, closeBackdrop } = useBackdrop();
 
     const [pools, setPools] = useState<tariswap.PoolProps[]>([]);
 
@@ -47,7 +51,7 @@ function Swap() {
     const [inputTokenDialogOpen, setInputTokenDialogOpen] = useState(false);
     const [outputTokenDialogOpen, setOutputTokenDialogOpen] = useState(false);
 
-    const [inputAmount, setInputAmount] = useState<string | null>(null);
+    const [inputAmount, setInputAmount] = useState<string>("");
 
     useEffect(() => {
         if (!provider) {
@@ -57,7 +61,6 @@ function Swap() {
         tariswap.listPools(provider, pool_index_component)
             .then(pools => {
                 setPools(pools);
-                console.log(pools);
 
                 let tokens: string[] = [];
                 pools.forEach((pool: tariswap.PoolProps) => {
@@ -113,16 +116,16 @@ function Swap() {
 
     const handleSwap = async () => {
         if (!provider) {
-            console.error("Provider is not set");
+            showSnackbar("Provider is not set", "error");
             return;
         }
         if (!inputAmount || !selectedInputToken || !selectedOutputToken) {
-            console.error("Required data is missing");
+            showSnackbar("Required data is missing", "error");
             return;
         }
         const inputAmountNumber = parseInt(inputAmount);
         if (!inputAmountNumber || inputAmountNumber <= 0) {
-            console.error("Invalid amount");
+            showSnackbar("Invalid amount", "error");
             return;
         }
 
@@ -132,7 +135,7 @@ function Swap() {
         );
 
         if (!pool) {
-            console.error("Pool not found matching the swap operation");
+            showSnackbar("Pool not found matching the swap operation", "error");
             return;
         }
 
@@ -145,14 +148,22 @@ function Swap() {
             selectedOutputToken
         });
 
-        const result = await tariswap.swap(
-            provider,
-            poolComponent,
-            selectedInputToken,
-            inputAmountNumber,
-            selectedOutputToken
-        );
-        console.log(result);
+        openBackdrop();
+        try {
+          const result = await tariswap.swap(
+              provider,
+              poolComponent,
+              selectedInputToken,
+              inputAmountNumber,
+              selectedOutputToken
+          );
+          console.log(result);
+          showSnackbar("Swap operation was successful!", "success");
+        } catch (error) {
+          console.log(error);
+          showSnackbar("Swap operation failed", "error");
+        }
+        closeBackdrop();
     }
 
     const canSwap = () => {
@@ -195,13 +206,6 @@ function Swap() {
                         sx={{ width: '40%', borderRadius: 2, textTransform: 'none', fontSize: 16 }}>
                             {selectedOutputToken ? (truncateResource(selectedOutputToken, 10)) : 'Select token'}
                     </Button>
-                    <TextField sx={{ width: '60%' }} placeholder="0"
-                        InputProps={{
-                            sx: { borderRadius: 2 },
-                        }}
-                        inputProps={{
-                            style: { textAlign: "right" },
-                        }} />
                 </Stack>
 
                 <Button variant="contained" disabled={!canSwap()}

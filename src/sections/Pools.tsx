@@ -82,8 +82,8 @@ function Pools() {
 
     return <Box>
         {
-            pools.map(pool => (
-                <Paper variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
+            pools.map((pool, index) => (
+                <Paper key={index} variant="outlined" elevation={0} sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
 
                     <Stack direction='row' alignItems='center' spacing={4}>
                         <Stack direction='column' sx={{ width: '60%' }}>

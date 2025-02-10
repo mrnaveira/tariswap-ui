@@ -26,16 +26,22 @@ import { Routes, Route } from "react-router-dom";
 import ErrorPage from "./routes/ErrorPage";
 import Layout from "./theme/LayoutMain";
 import Home from "./routes/home";
+import { SnackbarProvider } from "./components/SnackbarContext";
+import { BackdropProvider } from "./components/BackdropContext";
 
 export default function App() {
   return (
     <>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="*" element={<ErrorPage />} />
-          </Route>
-        </Routes>
+      <BackdropProvider>
+        <SnackbarProvider>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="*" element={<ErrorPage />} />
+            </Route>
+          </Routes>
+        </SnackbarProvider>
+      </BackdropProvider>
     </>
   );
 }

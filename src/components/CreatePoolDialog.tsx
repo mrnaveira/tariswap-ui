@@ -9,6 +9,8 @@ import { Button, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import useTariProvider from "../store/provider.ts";
 import * as tariswap from "../tariswap.ts";
+import { useSnackbar } from "./SnackbarContext.tsx";
+import { useBackdrop } from "./BackdropContext.tsx";
 
 export interface CreatePoolDialogProps {
     open: boolean;
@@ -19,6 +21,8 @@ export function CreatePoolDialog(props: CreatePoolDialogProps) {
     const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
 
     const { provider } = useTariProvider();
+    const { showSnackbar } = useSnackbar();
+    const { openBackdrop, closeBackdrop } = useBackdrop();
 
     const { onClose, open } = props;
 
@@ -47,21 +51,29 @@ export function CreatePoolDialog(props: CreatePoolDialogProps) {
 
     const handleCreatePool = async () => {
         if (!provider) {
-            console.error("Provider is not set");
+            showSnackbar("Provider is not set", "error");
             return;
         }
         if (!tokenA || !tokenB) {
-            console.error("Invalid tokens");
+            showSnackbar("Please, provide resource addresses of tokens", "error");
             return;
         }
 
-        const result = await tariswap.createPool(
-            provider,
-            pool_index_component,
-            tokenA,
-            tokenB
-        );
-        console.log({ result });
+        openBackdrop();
+        try {
+          const result = await tariswap.createPool(
+              provider,
+              pool_index_component,
+              tokenA,
+              tokenB
+          );
+          console.log({ result });
+          showSnackbar("Pool was created!", "success");
+        } catch (error) {
+          console.log(error);
+          showSnackbar("Failed to create the pool", "error");
+        }
+        closeBackdrop();
         onClose();
     };
 

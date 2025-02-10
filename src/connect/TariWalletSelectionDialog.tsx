@@ -15,6 +15,7 @@ import { TariPermissionKeyList, TariPermissionAccountInfo, TariPermissionTransac
 
 
 const WALLET_CONNECT_PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || null;
+const WALLET_DAEMON_ENABLED = import.meta.env.VITE_WALLET_DAEMON_ENABLED || false;
 
 // Minimal permissions for the example site
 // But each application will have different permission needs
@@ -43,14 +44,6 @@ export function TariWalletSelectionDialog(props: WalletSelectionProps) {
     onClose();
   };
 
-  const onWalletConnectClick = async () => {
-    const projectId = WALLET_CONNECT_PROJECT_ID;
-    const walletConnectProvider = new WalletConnectTariProvider(projectId);
-    handleClose();
-    await walletConnectProvider.connect();
-    onConnected(walletConnectProvider);
-  };
-
   const onWalletDaemonClick = async () => {
     const params: WalletDaemonFetchParameters = {
       permissions: walletDaemonPermissions,
@@ -60,6 +53,14 @@ export function TariWalletSelectionDialog(props: WalletSelectionProps) {
     const walletDaemonProvider = await WalletDaemonTariProvider.buildFetchProvider(params);
     onConnected(walletDaemonProvider);
     handleClose();
+  };
+
+  const onWalletConnectClick = async () => {
+    const projectId = WALLET_CONNECT_PROJECT_ID;
+    const walletConnectProvider = new WalletConnectTariProvider(projectId);
+    handleClose();
+    await walletConnectProvider.connect();
+    onConnected(walletConnectProvider);
   };
 
   return (
@@ -73,10 +74,12 @@ export function TariWalletSelectionDialog(props: WalletSelectionProps) {
         </Stack>
         <Divider sx={{mt: 3, mb: 3}} variant="middle"/>
         <Grid container spacing={2} justifyContent='center'>
+          { WALLET_DAEMON_ENABLED && (
           <Grid item xs={4}>
             <WalletConnectionMethodCard img={TariLogo} text='Tari Wallet Daemon'
                                         callback={onWalletDaemonClick}></WalletConnectionMethodCard>
           </Grid>
+          )}
           <Grid item xs={4}>
             <WalletConnectionMethodCard
               img={WalletConnectLogo}
