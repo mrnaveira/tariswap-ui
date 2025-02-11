@@ -50,7 +50,7 @@ export function RemoveLiquidityDialog(props: RemoveLiquidityDialogProps) {
                     showSnackbar("Failed to fetch pool liquidity resource", "error");
                 });
        }
-    }, [pool, provider]);
+    }, [pool, provider, showSnackbar]);
 
     const handleClose = () => {
         onClose();

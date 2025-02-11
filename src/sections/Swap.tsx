@@ -33,7 +33,7 @@ import { useSnackbar } from "../components/SnackbarContext.tsx";
 import { useBackdrop } from "../components/BackdropContext.tsx";
 
 function Swap() {
-    const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
+    const poolIndexComponent: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
 
     const { provider } = useTariProvider();
     const { showSnackbar } = useSnackbar();
@@ -58,7 +58,7 @@ function Swap() {
             return;
         }
 
-        tariswap.listPools(provider, pool_index_component)
+        tariswap.listPools(provider, poolIndexComponent)
             .then(pools => {
                 setPools(pools);
 
@@ -76,7 +76,7 @@ function Swap() {
             .catch(e => {
                 console.error(e);
             });
-    }, []);
+    }, [provider, poolIndexComponent]);
 
     const getCorrespondingPoolTokens = (token: string | null) => {
         if (!token)

@@ -14,17 +14,17 @@ export interface PoolProps {
 
 export async function createPoolIndex(
   provider: TariProvider,
-  pool_index_template: string,
-  pool_template: string,
-  market_fee: number
+  poolIndexTemplate: string,
+  poolTemplate: string,
+  marketFee: number
 ) {
   const account = await provider.getAccount();
   const builder = new TransactionBuilder().callFunction(
     {
-      templateAddress: pool_index_template,
+      templateAddress: poolIndexTemplate,
       functionName: "new",
     },
-    [pool_template, market_fee]
+    [poolTemplate, marketFee]
   );
   const result = await wallet.submitTransactionAndWaitForResult({
     provider,
@@ -37,14 +37,14 @@ export async function createPoolIndex(
 
 export async function createPool(
   provider: TariProvider,
-  pool_index_component: string,
+  poolIndexComponent: string,
   tokenA: string,
   tokenB: string
 ) {
   const account = await provider.getAccount();
   const builder = new TransactionBuilder().callMethod(
     {
-      componentAddress: pool_index_component,
+      componentAddress: poolIndexComponent,
       methodName: "create_pool",
     },
     [tokenA, tokenB]
@@ -55,7 +55,7 @@ export async function createPool(
     builder,
     requiredSubstates: [
       { substate_id: account.address },
-      { substate_id: pool_index_component },
+      { substate_id: poolIndexComponent },
     ],
   });
   return result;
@@ -63,51 +63,37 @@ export async function createPool(
 
 export async function listPools(
   provider: TariProvider,
-  pool_index_component: string
+  poolIndexComponent: string
 ): Promise<PoolProps[]> {
-  const substate = await wallet.getSubstate(provider, pool_index_component);
+  const substate = await wallet.getSubstate(provider, poolIndexComponent);
 
-  // extract the map of pools from the index substate
-  const component_body = substate.value.substate.Component.body.state.Map as {
-    Text: string;
-    Map: {
-      Array: string[];
-    }[][];
-  }[][];
-  const pools_field = component_body.find((field) => field[0].Text == "pools");
-  if (!pools_field) {
+  const state = cbor.convertCborValue(substate.value.substate.Component.body.state);
+  const pools = state["pools"] as Record<string, string> | undefined;
+  if (!pools) {
     return [];
   }
-  const pools_value = pools_field[1].Map;
 
-  // extract the resource addresses and the pool component for each pool
-  const pool_data = pools_value.map((value) => {
-    const resource_pair = value[0].Array;
-    const resourceA = cbor.convertCborValue(resource_pair[0]);
-    const resourceB = cbor.convertCborValue(resource_pair[1]);
-    const poolComponent = cbor.convertCborValue(value[1]);
+  return Object.entries(pools).map(([resources, poolComponent]) => {
+    const [resourceA, resourceB] = resources.split(",");
     return { resourceA, resourceB, poolComponent };
   });
-
-  return pool_data;
 }
 
 export async function getPoolLiquidityResource(
   provider: TariProvider,
-  pool_component: string
+  poolComponent: string
 ) {
-  const substate = await wallet.getSubstate(provider, pool_component);
+  const substate = await wallet.getSubstate(provider, poolComponent);
 
-  // extract the map of pools from the index substate
-  const component_body = substate.value.substate.Component.body.state;
-  const lpResource = cbor.getValueByPath(component_body, "$.lp_resource");
+  const componentBody = substate.value.substate.Component.body.state;
+  const lpResource = cbor.getValueByPath(componentBody, "$.lp_resource");
 
   return lpResource;
 }
 
 export async function addLiquidity(
   provider: TariProvider,
-  pool_component: string,
+  poolComponent: string,
   tokenA: string,
   amountTokenA: number,
   tokenB: string,
@@ -133,7 +119,7 @@ export async function addLiquidity(
     .saveVar("tokens_b")
     .callMethod(
       {
-        componentAddress: pool_component,
+        componentAddress: poolComponent,
         methodName: "add_liquidity",
       },
       [fromWorkspace("tokens_a"), fromWorkspace("tokens_b")]
@@ -152,7 +138,7 @@ export async function addLiquidity(
     builder,
     requiredSubstates: [
       { substate_id: account.address },
-      { substate_id: pool_component },
+      { substate_id: poolComponent },
     ],
   });
   return result;
@@ -160,7 +146,7 @@ export async function addLiquidity(
 
 export async function removeLiquidity(
   provider: TariProvider,
-  pool_component: string,
+  poolComponent: string,
   lpToken: string,
   amountLpToken: number
 ) {
@@ -176,7 +162,7 @@ export async function removeLiquidity(
     .saveVar("tokens_lp")
     .callMethod(
       {
-        componentAddress: pool_component,
+        componentAddress: poolComponent,
         methodName: "remove_liquidity",
       },
       [fromWorkspace("tokens_lp")]
@@ -202,7 +188,7 @@ export async function removeLiquidity(
     builder,
     requiredSubstates: [
       { substate_id: account.address },
-      { substate_id: pool_component },
+      { substate_id: poolComponent },
     ],
   });
   return result;
@@ -210,7 +196,7 @@ export async function removeLiquidity(
 
 export async function swap(
   provider: TariProvider,
-  pool_component: string,
+  poolComponent: string,
   inputToken: string,
   amountInputToken: number,
   outputToken: string
@@ -227,7 +213,7 @@ export async function swap(
     .saveVar("input_tokens")
     .callMethod(
       {
-        componentAddress: pool_component,
+        componentAddress: poolComponent,
         methodName: "swap",
       },
       [fromWorkspace("input_tokens"), outputToken]
@@ -247,7 +233,7 @@ export async function swap(
     builder,
     requiredSubstates: [
       { substate_id: account.address },
-      { substate_id: pool_component },
+      { substate_id: poolComponent },
     ],
   });
   return result;

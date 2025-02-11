@@ -18,7 +18,7 @@ export interface CreatePoolDialogProps {
 }
 
 export function CreatePoolDialog(props: CreatePoolDialogProps) {
-    const pool_index_component: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
+    const poolIndexComponent: string = import.meta.env.VITE_POOL_INDEX_COMPONENT;
 
     const { provider } = useTariProvider();
     const { showSnackbar } = useSnackbar();
@@ -63,7 +63,7 @@ export function CreatePoolDialog(props: CreatePoolDialogProps) {
         try {
           const result = await tariswap.createPool(
               provider,
-              pool_index_component,
+              poolIndexComponent,
               tokenA,
               tokenB
           );

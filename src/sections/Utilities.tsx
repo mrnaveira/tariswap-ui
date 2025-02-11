@@ -60,8 +60,6 @@ function Utilities() {
           console.log({ result });
           const response = result.result as { execution_results: { indexed: { value: string}}[]};
           const componentAddress = cbor.convertCborValue(response.execution_results[0].indexed.value);
-          // result.result.execution_results[0].indexed.value (cbor encoded ComponentAddress)
-          // result.result.result.Accept.up_substates => find (s => s.0.Component && s.1.version == 0)
           console.log({ componentAddress });
           showSnackbar(`Token faucet "${newTokenName}" was created!`, "success");
         } catch (error) {
